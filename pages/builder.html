@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>بناء المهام — Steam Cron Studio</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@400;700&family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/steam-theme.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .builder-main { padding: calc(var(--nav-height) + var(--space-lg)) var(--space-xl) var(--space-2xl); }
+    .builder-grid { display: grid; grid-template-columns: 1fr 370px; gap: var(--space-xl); max-width: 1300px; margin: 0 auto; align-items: start; }
+    @media(max-width:1100px){ .builder-grid{ grid-template-columns:1fr; } }
+
+    .step-section { margin-bottom: var(--space-xl); }
+    .step-section-header {
+      display: flex; align-items: center; gap: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-card); border: 1px solid var(--border-card);
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      border-bottom: none; cursor: pointer;
+    }
+    .step-section-body {
+      background: rgba(0,0,0,0.1); border: 1px solid var(--border-card);
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+      padding: var(--space-xl);
+    }
+    .step-num-big {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--accent-gold); color: var(--bg-deep);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 1.1rem; flex-shrink: 0;
+    }
+
+    /* Task cards in builder */
+    .builder-tasks { display: flex; flex-direction: column; gap: var(--space-md); }
+
+    .b-task {
+      background: var(--bg-card); border: 1px solid var(--border-card);
+      border-radius: var(--radius-lg); overflow: hidden;
+      transition: border-color var(--transition-fast);
+    }
+    .b-task.enabled  { border-color: rgba(102,192,244,0.35); }
+    .b-task.required { border-color: rgba(169,68,66,0.4); }
+
+    .b-task-head {
+      display: flex; align-items: center; gap: var(--space-md);
+      padding: var(--space-md) var(--space-lg); cursor: pointer;
+    }
+    .b-task-head:hover { background: rgba(102,192,244,0.03); }
+
+    .b-task-icon { font-size: 1.5rem; flex-shrink:0; }
+    .b-task-info { flex: 1; }
+    .b-task-name { font-weight: 700; color: var(--text-white); }
+    .b-task-meta { font-size: 0.78rem; color: var(--text-secondary); font-family: var(--font-mono); margin-top: 2px; }
+
+    .b-task-body {
+      display: none; padding: var(--space-lg);
+      border-top: 1px solid var(--border-card);
+      background: rgba(0,0,0,0.12);
+    }
+    .b-task.open .b-task-body { display: block; }
+    .b-task .chevron { transition: transform var(--transition-base); color: var(--text-secondary); }
+    .b-task.open .chevron { transform: rotate(180deg); }
+
+    /* Config rows */
+    .cfg-row { display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-md); }
+    .cfg-row:last-child { margin-bottom: 0; }
+    .cfg-label { min-width: 160px; font-size: 0.85rem; color: var(--text-secondary); flex-shrink:0; }
+    .cfg-val   { flex: 1; display: flex; align-items: center; gap: var(--space-sm); }
+    .cfg-suffix { font-size: 0.85rem; color: var(--text-secondary); flex-shrink: 0; }
+
+    /* Number input with +/- */
+    .num-input-wrap { display: flex; align-items: center; gap: 4px; }
+    .num-btn {
+      width: 28px; height: 28px; border-radius: var(--radius-sm);
+      background: rgba(102,192,244,0.1); border: 1px solid var(--border-card);
+      color: var(--accent-blue); font-size: 1rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background var(--transition-fast);
+    }
+    .num-btn:hover { background: rgba(102,192,244,0.2); }
+    .num-field {
+      width: 64px; text-align: center; padding: 4px 6px;
+      background: rgba(0,0,0,0.3); border: 1px solid var(--border-card);
+      border-radius: var(--radius-sm); color: var(--text-white);
+      font-family: var(--font-mono); font-size: 0.9rem;
+    }
+
+    /* Tag input */
+    .tag-wrap {
+      display: flex; flex-wrap: wrap; gap: 4px; padding: 6px;
+      background: rgba(0,0,0,0.3); border: 1px solid var(--border-card);
+      border-radius: var(--radius-md); min-height: 42px;
+      cursor: text; flex: 1;
+    }
+    .tag-chip {
+      display: flex; align-items: center; gap: 4px;
+      padding: 3px 8px; border-radius: var(--radius-pill);
+      background: rgba(102,192,244,0.12); border: 1px solid rgba(102,192,244,0.25);
+      font-size: 0.78rem; color: var(--accent-blue);
+    }
+    .tag-x { background: none; border: none; color: var(--accent-blue); cursor: pointer; padding: 0; font-size: 0.85rem; opacity: 0.7; }
+    .tag-x:hover { opacity: 1; }
+    .tag-in {
+      background: none; border: none; color: var(--text-white);
+      font-family: var(--font-arabic); font-size: 0.85rem;
+      outline: none; min-width: 80px; flex: 1;
+    }
+
+    /* Schedule picker */
+    .sched-wrap { display: flex; flex-direction: column; gap: var(--space-sm); }
+    .sched-pills { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+    .sched-pill {
+      padding: 5px var(--space-md); border-radius: var(--radius-pill);
+      border: 1px solid var(--border-card); font-size: 0.8rem; cursor: pointer;
+      background: transparent; color: var(--text-secondary); font-family: var(--font-arabic);
+      transition: all var(--transition-fast);
+    }
+    .sched-pill.active, .sched-pill:hover { border-color: var(--accent-blue); color: var(--accent-blue); background: rgba(102,192,244,0.08); }
+    .sched-custom-row { display: flex; gap: var(--space-sm); align-items: center; }
+    .cron-result { font-family: var(--font-mono); font-size: 0.9rem; color: var(--accent-blue); padding: 6px var(--space-md); background: rgba(0,0,0,0.3); border-radius: var(--radius-sm); border: 1px solid var(--border-card); }
+
+    /* Preview panel */
+    .preview-sticky { position: sticky; top: calc(var(--nav-height) + var(--space-md)); }
+    .preview-box { background: var(--bg-deep); border: 1px solid var(--border-card); border-radius: var(--radius-lg); overflow: hidden; }
+    .preview-head { padding: var(--space-md) var(--space-lg); border-bottom: 1px solid var(--border-card); background: rgba(0,0,0,0.2); }
+    .preview-body { padding: var(--space-md); min-height: 200px; max-height: calc(100vh - 280px); overflow-y: auto; }
+
+    .tg-preview {
+      background: #212d3b; border-radius: 12px 12px 12px 3px;
+      padding: var(--space-md); font-size: 0.875rem; line-height: 1.65;
+      color: #d1d5db; max-width: 340px; word-break: break-word;
+      white-space: pre-wrap; border: 1px solid rgba(102,192,244,0.08);
+    }
+    .tg-preview b { color: #fff; font-weight: 700; }
+    .tg-preview i { color: #9ca3af; }
+    .tg-preview a { color: #60a5fa; }
+    .tg-preview s { text-decoration: line-through; opacity: 0.7; }
+
+    /* Export section */
+    .export-card { background: var(--bg-card); border: 1px solid var(--border-gold); border-radius: var(--radius-lg); padding: var(--space-xl); }
+    .export-btns { display: flex; flex-wrap: wrap; gap: var(--space-md); margin-top: var(--space-lg); }
+
+    /* YAML preview */
+    .yaml-box { background: var(--bg-deep); border: 1px solid var(--border-card); border-radius: var(--radius-md); overflow: hidden; }
+    .yaml-box-head { padding: var(--space-sm) var(--space-md); border-bottom: 1px solid var(--border-card); display: flex; justify-content: space-between; align-items: center; }
+    .yaml-content { padding: var(--space-md); font-family: var(--font-mono); font-size: 0.78rem; color: var(--accent-blue); line-height: 1.7; max-height: 300px; overflow-y: auto; white-space: pre; }
+
+    /* Cron NL section */
+    .cron-nl-box { background: rgba(0,0,0,0.2); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: var(--space-md); margin-top: var(--space-md); }
+    .cron-nl-row { display: flex; gap: var(--space-sm); }
+    .cron-nl-in { flex: 1; padding: 8px var(--space-md); background: rgba(0,0,0,0.3); border: 1px solid var(--border-card); border-radius: var(--radius-sm); color: var(--text-white); font-family: var(--font-arabic); font-size: 0.9rem; outline: none; }
+    .cron-nl-in:focus { border-color: var(--accent-blue); }
+    .cron-nl-result { margin-top: var(--space-sm); font-size: 0.85rem; color: var(--text-secondary); }
+
+    /* Steam verify */
+    .steam-verify-row { display: flex; gap: var(--space-sm); }
+    .steam-verify-row .form-input { flex: 1; }
+    .avatar-preview { width: 52px; height: 52px; border-radius: 6px; border: 2px solid var(--accent-blue); object-fit: cover; display: none; }
+  </style>
+</head>
+<body>
+<nav class="nav" id="nav-host"></nav>
+
+<main class="builder-main">
+  <div class="builder-grid">
+
+    <!-- ══ LEFT COLUMN: Steps ══════════════════════════════════ -->
+    <div class="builder-left">
+
+      <!-- STEP 1: Global Settings -->
+      <div class="step-section" id="step1">
+        <div class="step-section-header">
+          <div class="step-num-big">1</div>
+          <div>
+            <div style="font-weight:700;color:var(--text-white);font-size:1.1rem" data-i18n="step1_title">إعدادات عامة</div>
+            <div style="font-size:0.82rem;color:var(--text-secondary)">Steam ID، Telegram، المنطقة</div>
+          </div>
+        </div>
+        <div class="step-section-body">
+
+          <!-- Steam ID -->
+          <div class="form-group">
+            <label class="form-label" data-i18n="steam_id_label">Steam ID (SteamID64)</label>
+            <div class="steam-verify-row">
+              <img id="steam-avatar" class="avatar-preview" alt="Steam Avatar">
+              <input type="text" id="steam-id-input" class="form-input"
+                     placeholder="76561198017149971"
+                     maxlength="17" inputmode="numeric"
+                     data-i18n-placeholder="steam_id_placeholder">
+              <button id="verify-btn" class="btn btn-ghost btn-sm" data-i18n="verify_btn">تحقق</button>
+            </div>
+            <div id="steam-verify-msg" style="font-size:0.8rem;margin-top:4px;"></div>
+            <div class="muted" style="font-size:0.78rem;margin-top:4px;" data-i18n="steam_id_hint">17 رقم يبدأ بـ 7656119</div>
+          </div>
+
+          <!-- Telegram Chat ID -->
+          <div class="form-group">
+            <label class="form-label" data-i18n="chat_id_label">Telegram Chat ID</label>
+            <input type="text" id="chat-id-input" class="form-input"
+                   placeholder="6803381"
+                   data-i18n-placeholder="chat_id_placeholder">
+          </div>
+
+          <!-- Region + Currency + Timezone -->
+          <div class="grid grid-3" style="gap:var(--space-md)">
+            <div class="form-group">
+              <label class="form-label" data-i18n="region_label">المنطقة</label>
+              <select id="region-select" class="form-select">
+                <option value="sa" selected>🇸🇦 Saudi Arabia (SA)</option>
+                <option value="ae">🇦🇪 UAE (AE)</option>
+                <option value="kw">🇰🇼 Kuwait (KW)</option>
+                <option value="us">🇺🇸 USA (US)</option>
+                <option value="gb">🇬🇧 UK (GB)</option>
+                <option value="de">🇩🇪 Germany (DE)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="currency_label">العملة</label>
+              <select id="currency-select" class="form-select">
+                <option value="SAR" selected>SAR (ر.س)</option>
+                <option value="AED">AED (د.إ)</option>
+                <option value="KWD">KWD (د.ك)</option>
+                <option value="USD">USD ($)</option>
+                <option value="GBP">GBP (£)</option>
+                <option value="EUR">EUR (€)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="timezone_label">التوقيت</label>
+              <select id="tz-select" class="form-select">
+                <option value="Asia/Riyadh" selected>Asia/Riyadh</option>
+                <option value="Asia/Dubai">Asia/Dubai</option>
+                <option value="Asia/Kuwait">Asia/Kuwait</option>
+                <option value="UTC">UTC</option>
+                <option value="Europe/London">Europe/London</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="alert alert-info" style="margin-top:var(--space-md)">
+            <span class="alert-icon">🔒</span>
+            <div class="alert-content" data-i18n="notice_client_only">مفاتيح API تُحفظ في المتصفح فقط ولا تُرسَل لأي خادم.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: Tasks -->
+      <div class="step-section" id="step2">
+        <div class="step-section-header">
+          <div class="step-num-big" style="background:var(--accent-blue)">2</div>
+          <div>
+            <div style="font-weight:700;color:var(--text-white);font-size:1.1rem" data-i18n="tasks_step_title">تفعيل المهام وتخصيصها</div>
+            <div style="font-size:0.82rem;color:var(--text-secondary)" data-i18n="tasks_step_subtitle">اضغط على أي مهمة لتوسيعها وتخصيص إعداداتها</div>
+          </div>
+        </div>
+        <div class="step-section-body">
+          <div class="builder-tasks" id="tasks-container">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: Export -->
+      <div class="step-section" id="step3">
+        <div class="step-section-header">
+          <div class="step-num-big" style="background:var(--accent-green)">3</div>
+          <div>
+            <div style="font-weight:700;color:var(--text-white);font-size:1.1rem" data-i18n="export_title">تصدير التهيئة</div>
+            <div style="font-size:0.82rem;color:var(--text-secondary)" data-i18n="export_subtitle">اختر صيغة التصدير المناسبة لبيئتك</div>
+          </div>
+        </div>
+        <div class="step-section-body">
+          <div class="export-btns">
+            <button id="btn-dl-yaml"    class="btn btn-primary">⬇️ <span data-i18n="btn_export_yaml">تحميل YAML</span></button>
+            <button id="btn-dl-docker"  class="btn btn-ghost">🐳 <span data-i18n="btn_export_docker">Docker Compose</span></button>
+            <button id="btn-dl-systemd" class="btn btn-ghost">⚙️ <span data-i18n="btn_export_systemd">Systemd Service</span></button>
+            <button id="btn-share"      class="btn btn-ghost">🔗 <span data-i18n="btn_share_url">مشاركة بـ URL</span></button>
+            <button id="btn-copy-yaml"  class="btn btn-ghost">📋 <span data-i18n="btn_copy_yaml">نسخ YAML</span></button>
+          </div>
+
+          <!-- YAML Preview -->
+          <div class="yaml-box" style="margin-top:var(--space-lg)">
+            <div class="yaml-box-head">
+              <span class="code-lang">cron_tasks.yaml</span>
+              <span id="tasks-count" class="badge badge-blue">0 مهام</span>
+            </div>
+            <div class="yaml-content" id="yaml-preview">
+              # أدخل إعداداتك أولاً لتوليد الـ YAML
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ RIGHT COLUMN: Preview Panel ═══════════════════════ -->
+    <div class="preview-sticky">
+      <div class="preview-box">
+        <div class="preview-head">
+          <div class="flex-between">
+            <span style="font-weight:700;color:var(--text-white)" data-i18n="preview_title">المعاينة</span>
+            <div class="tabs" style="border:none;gap:2px">
+              <button class="tab-btn active" data-tab-id="tab-tg">Telegram</button>
+              <button class="tab-btn"        data-tab-id="tab-yaml">YAML</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Telegram Preview -->
+        <div class="preview-body" id="tab-tg">
+          <div style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:var(--space-sm)">
+            🤖 OpenClaw Bot
+          </div>
+          <div class="tg-preview" id="tg-preview-content">
+            اختر مهمة لمعاينة رسالة Telegram
+          </div>
+          <div style="margin-top:var(--space-md)">
+            <label class="form-label" style="margin-bottom:4px">معاينة مهمة:</label>
+            <select id="preview-task-select" class="form-select" style="font-size:0.85rem">
+            </select>
+          </div>
+        </div>
+
+        <!-- Tab: YAML mini preview -->
+        <div class="preview-body" id="tab-yaml" style="display:none">
+          <pre id="yaml-mini-preview" style="font-size:0.72rem;max-height:400px;overflow:auto;border:none;background:transparent;padding:0;color:var(--accent-blue)"># YAML preview here</pre>
+        </div>
+
+      </div>
+
+      <!-- Cron NL Translator -->
+      <div style="margin-top:var(--space-md)">
+        <div class="card" style="padding:var(--space-md)">
+          <div style="font-weight:700;color:var(--text-white);margin-bottom:var(--space-sm);font-size:0.9rem">
+            🕐 Cron Translator العربي
+          </div>
+          <div class="cron-nl-row">
+            <input type="text" id="cron-nl-input" class="cron-nl-in"
+                   placeholder="كل خميس الساعة 2 ظهراً...">
+            <button id="cron-nl-btn" class="btn btn-ghost btn-sm" data-i18n="cron_nl_btn">ترجم</button>
+          </div>
+          <div class="cron-nl-result" id="cron-nl-result"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<footer class="footer" id="footer-host"></footer>
+
+<script type="module">
+import { initPage, showToast, downloadFile, copyToClipboard, fetchSteamProfile, isValidSteamId, getLang, setState, getState } from '../js/app.js';
+import { TASKS_REGISTRY, buildDefaultConfigs } from '../js/tasks-registry.js';
+import { generateYaml }         from '../js/generators/yaml.js';
+import { generateDockerCompose } from '../js/generators/docker.js';
+import { generateSystemd }       from '../js/generators/systemd.js';
+import { nlToCron, cronToHuman } from '../js/utils/cron-nl.js';
+import { buildShareUrl, readConfigFromUrl } from '../js/utils/url-state.js';
+import { t } from '../js/i18n.js';
+
+// ── App State ──────────────────────────────────────────────────
+let tasksCfg = buildDefaultConfigs();
+let globalCfg = { steamId:'', chatId:'', region:'sa', currency:'SAR', timezone:'Asia/Riyadh' };
+
+// Load from URL if present
+const urlCfg = readConfigFromUrl();
+if (urlCfg?.tasksCfg) tasksCfg = { ...tasksCfg, ...urlCfg.tasksCfg };
+
+// ── Init ───────────────────────────────────────────────────────
+initPage('builder');
+renderTasks();
+updateAllPreviews();
+
+// ── Tab switching ──────────────────────────────────────────────
+document.querySelectorAll('[data-tab-id]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-tab-id]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const id = btn.dataset.tabId;
+    document.getElementById('tab-tg').style.display   = id === 'tab-tg'   ? 'block' : 'none';
+    document.getElementById('tab-yaml').style.display  = id === 'tab-yaml' ? 'block' : 'none';
+  });
+});
+
+// ── Global config inputs ────────────────────────────────────────
+document.getElementById('steam-id-input').addEventListener('input', e => {
+  globalCfg.steamId = e.target.value.trim();
+  updateAllPreviews();
+});
+document.getElementById('chat-id-input').addEventListener('input', e => {
+  globalCfg.chatId = e.target.value.trim();
+  updateAllPreviews();
+});
+document.getElementById('region-select').addEventListener('change', e => {
+  globalCfg.region = e.target.value;
+  updateAllPreviews();
+});
+document.getElementById('currency-select').addEventListener('change', e => {
+  globalCfg.currency = e.target.value;
+  updateAllPreviews();
+});
+document.getElementById('tz-select').addEventListener('change', e => {
+  globalCfg.timezone = e.target.value;
+  updateAllPreviews();
+});
+
+// ── Steam Verify ───────────────────────────────────────────────
+document.getElementById('verify-btn').addEventListener('click', async () => {
+  const id  = document.getElementById('steam-id-input').value.trim();
+  const msg = document.getElementById('steam-verify-msg');
+  const avatar = document.getElementById('steam-avatar');
+
+  if (!isValidSteamId(id)) {
+    msg.textContent = t('err_invalid_steam_id', getLang());
+    msg.style.color = 'var(--accent-red)';
+    return;
+  }
+
+  msg.textContent = '⏳ جاري التحقق...';
+  msg.style.color = 'var(--text-secondary)';
+
+  try {
+    const profile = await fetchSteamProfile(id);
+    msg.innerHTML  = `✅ <b style="color:var(--text-white)">${profile.name}</b> · عضو منذ ${profile.memberSince || '—'}`;
+    msg.style.color = '#8fb940';
+    if (profile.avatar) {
+      avatar.src   = profile.avatar;
+      avatar.style.display = 'block';
+    }
+    globalCfg.steamId = id;
+    showToast(t('toast_steam_ok', getLang()), 'success');
+  } catch {
+    msg.textContent = t('toast_steam_err', getLang());
+    msg.style.color = 'var(--accent-red)';
+    showToast(t('toast_steam_err', getLang()), 'error');
+  }
+});
+
+// ── Render Task Cards ───────────────────────────────────────────
+function renderTasks() {
+  const lang = getLang();
+  const container = document.getElementById('tasks-container');
+  const previewSel = document.getElementById('preview-task-select');
+
+  container.innerHTML = '';
+  previewSel.innerHTML = '';
+
+  for (const task of TASKS_REGISTRY) {
+    const cfg = tasksCfg[task.id];
+    const card = document.createElement('div');
+    card.className = `b-task ${cfg.enabled ? 'enabled' : ''} ${task.privacyHigh ? 'required' : ''}`;
+    card.dataset.id = task.id;
+
+    const humanSched = cronToHuman(cfg.schedule);
+    const humanStr   = humanSched.ar || humanSched;
+
+    card.innerHTML = `
+      <div class="b-task-head">
+        <span class="b-task-icon">${task.icon}</span>
+        <div class="b-task-info">
+          <div class="b-task-name">${task.name[lang] || task.name.ar}</div>
+          <div class="b-task-meta">${humanStr} · ${task.outputFormat === 'image' ? '🖼️ صورة' : '📝 نص'}${task.privacyHigh ? ' · 🔒 خاص' : ''}${task.requiresItad ? ' · ⚠️ ITAD' : ''}</div>
+        </div>
+        <label class="toggle-switch" onclick="event.stopPropagation()">
+          <input type="checkbox" class="task-toggle" data-task="${task.id}" ${cfg.enabled ? 'checked' : ''}>
+          <div class="toggle-track"></div>
+        </label>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="b-task-body">
+        ${task.privacyHigh ? `<div class="alert alert-danger" style="margin-bottom:var(--space-md)"><span class="alert-icon">🔒</span><div class="alert-content" data-i18n="notice_privacy_high">بيانات الأصدقاء — لن تُعرض كصورة أبدًا (خصوصية)</div></div>` : ''}
+        ${task.requiresItad ? `<div class="alert alert-warning" style="margin-bottom:var(--space-md)"><span class="alert-icon">⚠️</span><div class="alert-content" data-i18n="notice_itad_required">هذه المهمة تحتاج ITAD API Key</div></div>` : ''}
+        <div class="cfg-row">
+          <span class="cfg-label">الجدولة</span>
+          <div class="cfg-val">
+            <div class="sched-wrap" style="flex:1">
+              <div class="sched-pills" data-task="${task.id}">
+                ${getSchedulePresets(task).map(p => `<button class="sched-pill ${p.cron === cfg.schedule ? 'active' : ''}" data-cron="${p.cron}">${p.label}</button>`).join('')}
+              </div>
+              <div class="sched-custom-row">
+                <input type="text" class="cron-result" data-task="${task.id}" value="${cfg.schedule}" style="flex:1" dir="ltr">
+                <span class="muted" style="font-size:0.75rem" id="cron-human-${task.id}">${humanStr}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        ${renderConfigs(task, cfg.configs)}
+      </div>
+    `;
+    container.appendChild(card);
+
+    // Preview select option
+    const opt = document.createElement('option');
+    opt.value = task.id;
+    opt.textContent = `${task.icon} ${task.name[lang] || task.name.ar}`;
+    previewSel.appendChild(opt);
+  }
+
+  // Attach toggle listeners
+  container.querySelectorAll('.task-toggle').forEach(chk => {
+    chk.addEventListener('change', e => {
+      const id = e.target.dataset.task;
+      tasksCfg[id].enabled = e.target.checked;
+      e.target.closest('.b-task').classList.toggle('enabled', e.target.checked);
+      updateAllPreviews();
+    });
+  });
+
+  // Attach expand listeners
+  container.querySelectorAll('.b-task-head').forEach(head => {
+    head.addEventListener('click', e => {
+      if (e.target.closest('.toggle-switch')) return;
+      const card = head.closest('.b-task');
+      // Close others
+      container.querySelectorAll('.b-task.open').forEach(c => { if (c !== card) c.classList.remove('open'); });
+      card.classList.toggle('open');
+    });
+  });
+
+  // Schedule pill listeners
+  container.querySelectorAll('.sched-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      const taskId = pill.closest('.sched-pills').dataset.task;
+      const cron   = pill.dataset.cron;
+      pill.closest('.sched-pills').querySelectorAll('.sched-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      const input  = container.querySelector(`.cron-result[data-task="${taskId}"]`);
+      if (input) input.value = cron;
+      tasksCfg[taskId].schedule = cron;
+      const h = cronToHuman(cron);
+      const humanEl = document.getElementById(`cron-human-${taskId}`);
+      if (humanEl) humanEl.textContent = h.ar || h;
+      updateAllPreviews();
+    });
+  });
+
+  // Cron input listeners
+  container.querySelectorAll('.cron-result').forEach(input => {
+    input.addEventListener('change', e => {
+      const taskId = e.target.dataset.task;
+      tasksCfg[taskId].schedule = e.target.value.trim();
+      const h = cronToHuman(e.target.value.trim());
+      const humanEl = document.getElementById(`cron-human-${taskId}`);
+      if (humanEl) humanEl.textContent = h.ar || h;
+      updateAllPreviews();
+    });
+  });
+
+  attachConfigListeners();
+}
+
+function getSchedulePresets(task) {
+  const presets = [
+    { label: 'يومياً 16:00', cron: '0 16 * * *' },
+    { label: 'يومياً 20:00', cron: '0 20 * * *' },
+    { label: 'الأحد 09:00',  cron: '0 9 * * 0' },
+    { label: 'الأحد 11:00',  cron: '0 11 * * 0' },
+    { label: 'الثلاثاء 19:00', cron: '0 19 * * 2' },
+    { label: 'الخميس 14:15', cron: '15 14 * * 4' },
+    { label: 'الجمعة 10:00', cron: '0 10 * * 5' },
+    { label: 'السبت 17:00',  cron: '0 17 * * 6' },
+  ];
+  // Return the task default + 2 alternatives
+  const taskPreset = presets.find(p => p.cron === task.schedule) || { label: 'مخصص', cron: task.schedule };
+  const others = presets.filter(p => p.cron !== task.schedule).slice(0, 2);
+  return [taskPreset, ...others];
+}
+
+function renderConfigs(task, cfgVals) {
+  if (!task.configs.length) return '';
+  const rows = task.configs.map(cfgDef => {
+    const val = cfgVals[cfgDef.key] ?? cfgDef.default;
+    const labelKey = cfgDef.labelKey;
+    const label = t(labelKey, getLang());
+
+    if (cfgDef.type === 'bool') {
+      return `<div class="cfg-row">
+        <span class="cfg-label">${label}</span>
+        <div class="cfg-val">
+          <label class="toggle-switch">
+            <input type="checkbox" class="cfg-bool" data-task="${task.id}" data-key="${cfgDef.key}" ${val ? 'checked' : ''}>
+            <div class="toggle-track"></div>
+          </label>
+        </div>
+      </div>`;
+    }
+
+    if (cfgDef.type === 'number') {
+      return `<div class="cfg-row">
+        <span class="cfg-label">${label}</span>
+        <div class="cfg-val">
+          <div class="num-input-wrap">
+            <button class="num-btn" data-op="dec" data-task="${task.id}" data-key="${cfgDef.key}" data-min="${cfgDef.min||0}">−</button>
+            <input type="number" class="num-field cfg-num" data-task="${task.id}" data-key="${cfgDef.key}" value="${val}" min="${cfgDef.min||0}" max="${cfgDef.max||999}">
+            <button class="num-btn" data-op="inc" data-task="${task.id}" data-key="${cfgDef.key}" data-max="${cfgDef.max||999}">+</button>
+          </div>
+          ${cfgDef.suffix ? `<span class="cfg-suffix">${cfgDef.suffix}</span>` : ''}
+        </div>
+      </div>`;
+    }
+
+    if (cfgDef.type === 'tags') {
+      const tags = Array.isArray(val) ? val : cfgDef.default;
+      return `<div class="cfg-row" style="align-items:flex-start">
+        <span class="cfg-label" style="padding-top:8px">${label}</span>
+        <div class="cfg-val">
+          <div class="tag-wrap" data-task="${task.id}" data-key="${cfgDef.key}">
+            ${tags.map(tag => `<span class="tag-chip">${tag}<button class="tag-x" data-tag="${tag}">×</button></span>`).join('')}
+            <input type="text" class="tag-in" placeholder="أضف...">
+          </div>
+        </div>
+      </div>`;
+    }
+
+    return '';
+  }).join('');
+
+  return rows;
+}
+
+function attachConfigListeners() {
+  const container = document.getElementById('tasks-container');
+
+  container.querySelectorAll('.cfg-bool').forEach(chk => {
+    chk.addEventListener('change', e => {
+      tasksCfg[e.target.dataset.task].configs[e.target.dataset.key] = e.target.checked;
+      updateAllPreviews();
+    });
+  });
+
+  container.querySelectorAll('.num-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const { task, key, op, min, max } = btn.dataset;
+      const input = btn.parentElement.querySelector('.cfg-num');
+      let val = parseInt(input.value) || 0;
+      val = op === 'inc' ? Math.min(val + 1, parseInt(max)||999) : Math.max(val - 1, parseInt(min)||0);
+      input.value = val;
+      tasksCfg[task].configs[key] = val;
+      updateAllPreviews();
+    });
+  });
+
+  container.querySelectorAll('.cfg-num').forEach(inp => {
+    inp.addEventListener('change', e => {
+      tasksCfg[e.target.dataset.task].configs[e.target.dataset.key] = parseInt(e.target.value) || 0;
+      updateAllPreviews();
+    });
+  });
+
+  // Tags
+  container.querySelectorAll('.tag-wrap').forEach(wrap => {
+    const { task, key } = wrap.dataset;
+
+    wrap.addEventListener('click', () => wrap.querySelector('.tag-in').focus());
+
+    wrap.querySelectorAll('.tag-x').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const tag   = e.target.dataset.tag;
+        const tags  = tasksCfg[task].configs[key] || [];
+        tasksCfg[task].configs[key] = tags.filter(t => t !== tag);
+        e.target.parentElement.remove();
+        updateAllPreviews();
+      });
+    });
+
+    const input = wrap.querySelector('.tag-in');
+    input.addEventListener('keydown', e => {
+      if ((e.key === 'Enter' || e.key === ',') && input.value.trim()) {
+        e.preventDefault();
+        const tag = input.value.trim().replace(',','');
+        if (!tag) return;
+        const tags = Array.isArray(tasksCfg[task].configs[key]) ? tasksCfg[task].configs[key] : [];
+        if (!tags.includes(tag)) {
+          tags.push(tag);
+          tasksCfg[task].configs[key] = tags;
+          const chip = document.createElement('span');
+          chip.className = 'tag-chip';
+          chip.innerHTML = `${tag}<button class="tag-x" data-tag="${tag}">×</button>`;
+          chip.querySelector('.tag-x').addEventListener('click', () => {
+            tasksCfg[task].configs[key] = tasksCfg[task].configs[key].filter(t => t !== tag);
+            chip.remove();
+            updateAllPreviews();
+          });
+          wrap.insertBefore(chip, input);
+        }
+        input.value = '';
+        updateAllPreviews();
+      }
+    });
+  });
+}
+
+// ── Preview Updates ─────────────────────────────────────────────
+function updateAllPreviews() {
+  updateTgPreview();
+  updateYamlPreview();
+  updateTasksCount();
+}
+
+function updateTgPreview() {
+  const taskId  = document.getElementById('preview-task-select').value;
+  const task    = TASKS_REGISTRY.find(t => t.id === taskId);
+  const content = document.getElementById('tg-preview-content');
+  if (!task || !content) return;
+  const lang    = getLang();
+  const raw     = task.telegramPreview(tasksCfg[task.id]?.configs || {}, lang);
+  content.innerHTML = raw
+    .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+    .replace(/\n/g, '<br>');
+}
+
+document.getElementById('preview-task-select').addEventListener('change', updateTgPreview);
+
+function updateYamlPreview() {
+  const yaml = generateYaml(globalCfg, tasksCfg);
+  document.getElementById('yaml-preview').textContent     = yaml;
+  document.getElementById('yaml-mini-preview').textContent = yaml;
+}
+
+function updateTasksCount() {
+  const count = TASKS_REGISTRY.filter(t => tasksCfg[t.id]?.enabled).length;
+  const el    = document.getElementById('tasks-count');
+  const lang  = getLang();
+  if (el) el.textContent = `${count} ${lang === 'ar' ? 'مهام' : 'tasks'}`;
+}
+
+// ── Export Buttons ──────────────────────────────────────────────
+document.getElementById('btn-dl-yaml').addEventListener('click', () => {
+  const enabled = TASKS_REGISTRY.filter(t => tasksCfg[t.id]?.enabled);
+  if (!enabled.length) { showToast(t('toast_no_tasks', getLang()), 'warning'); return; }
+  downloadFile(generateYaml(globalCfg, tasksCfg), 'cron_tasks.yaml', 'text/yaml');
+});
+
+document.getElementById('btn-copy-yaml').addEventListener('click', async () => {
+  const yaml = generateYaml(globalCfg, tasksCfg);
+  await copyToClipboard(yaml, t('toast_copied', getLang()));
+});
+
+document.getElementById('btn-dl-docker').addEventListener('click', () => {
+  downloadFile(generateDockerCompose(globalCfg, tasksCfg), 'docker-compose.yml', 'text/yaml');
+});
+
+document.getElementById('btn-dl-systemd').addEventListener('click', () => {
+  const { service, timer, install } = generateSystemd(globalCfg);
+  downloadFile(service,  'openclaw-steam.service', 'text/plain');
+  setTimeout(() => downloadFile(timer,   'openclaw-steam.timer',   'text/plain'), 300);
+  setTimeout(() => downloadFile(install, 'install.sh',             'text/plain'), 600);
+});
+
+document.getElementById('btn-share').addEventListener('click', async () => {
+  const url = buildShareUrl({ tasksCfg, region: globalCfg.region });
+  await copyToClipboard(url, t('toast_link_copied', getLang()));
+});
+
+// ── Cron NL Translator ──────────────────────────────────────────
+document.getElementById('cron-nl-btn').addEventListener('click', () => {
+  const input  = document.getElementById('cron-nl-input').value.trim();
+  const result = document.getElementById('cron-nl-result');
+  if (!input) return;
+  const { cron, human } = nlToCron(input);
+  result.innerHTML = `<span style="color:var(--accent-blue);font-family:var(--font-mono)">${cron}</span> <span style="color:var(--text-secondary);margin-right:8px">${human.ar || human}</span>`;
+});
+
+document.getElementById('cron-nl-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('cron-nl-btn').click();
+});
+
+// Re-render on language change
+document.addEventListener('state-changed', () => renderTasks());
+</script>
+</body>
+</html>
