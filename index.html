@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="أداة بصرية لبناء مهام مراقبة Steam لوكلاء الذكاء الاصطناعي — أنتج cron_tasks.yaml احترافي في دقائق">
+  <meta name="theme-color" content="#1b2838">
+  <meta property="og:title" content="Steam Cron Studio — بنّاء مهام Steam البصري">
+  <meta property="og:description" content="أنتج ملف cron_tasks.yaml لوكلاء الذكاء الاصطناعي في دقائق">
+  <meta property="og:image" content="assets/icons/logo.svg">
+  <title>Steam Cron Studio — بنّاء مهام Steam البصري</title>
+  <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@400;700&family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/steam-theme.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+
+<!-- ── Navigation ── -->
+<nav class="nav" id="nav-host"></nav>
+
+<!-- ── Main Content ── -->
+<main class="main">
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <img src="assets/icons/logo.svg" alt="Steam Cron Studio Logo" class="hero-logo">
+
+    <h1 class="hero-title">
+      <span data-i18n="hero_title">بنّاء مهام </span>
+      <span class="highlight">Steam</span>
+      <span> البصري</span>
+    </h1>
+
+    <p class="hero-subtitle" data-i18n="hero_subtitle">
+      أنتج ملف cron_tasks.yaml احترافي لوكلاء الذكاء الاصطناعي في دقائق — تصميم بصري، دعم عربي كامل، تصدير متعدد الصيغ.
+    </p>
+
+    <div class="hero-cta">
+      <a href="pages/builder.html" class="btn btn-primary btn-lg" data-i18n="cta_start">ابدأ البناء</a>
+      <a href="pages/guide-api-keys.html" class="btn btn-ghost btn-lg" data-i18n="cta_guide">الدليل</a>
+      <a href="https://github.com/abosalehg-ui/steam-cron-studio"
+         target="_blank" rel="noopener"
+         class="btn btn-ghost btn-lg">
+        GitHub ↗
+      </a>
+    </div>
+
+    <div class="hero-stats stagger-children">
+      <div class="hero-stat">
+        <div class="hero-stat-num">8</div>
+        <div class="hero-stat-label" data-i18n="stat_tasks">مهمة جاهزة</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">3</div>
+        <div class="hero-stat-label" data-i18n="stat_formats">صيغ تصدير</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">6</div>
+        <div class="hero-stat-label" data-i18n="stat_frameworks">إطار عمل</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">100%</div>
+        <div class="hero-stat-label" data-i18n="stat_client">كل شيء في المتصفح</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="container">
+      <h2 class="features-title" data-i18n="features_title">لماذا Steam Cron Studio؟</h2>
+
+      <div class="grid grid-3 stagger-children">
+        <div class="feature-card">
+          <span class="feature-icon">📋</span>
+          <h3 data-i18n="feat_templates_title">قوالب جاهزة</h3>
+          <p data-i18n="feat_templates_desc">8 مهام Steam مُعدّة مسبقًا مع prompts محسّنة وإعدادات قابلة للتخصيص الكامل.</p>
+        </div>
+
+        <div class="feature-card">
+          <span class="feature-icon">👁️</span>
+          <h3 data-i18n="feat_preview_title">معاينة فورية</h3>
+          <p data-i18n="feat_preview_desc">شوف رسالة Telegram قبل ما تولّد اليامل — معاينة نصية وصورة في نفس الوقت.</p>
+        </div>
+
+        <div class="feature-card">
+          <span class="feature-icon">🌍</span>
+          <h3 data-i18n="feat_arabic_title">دعم عربي كامل</h3>
+          <p data-i18n="feat_arabic_desc">واجهة RTL، Cron Translator بالعربي، ومخرجات بالعربي واللهجة السعودية.</p>
+        </div>
+
+        <div class="feature-card">
+          <span class="feature-icon">🔒</span>
+          <h3 data-i18n="feat_client_title">بدون خوادم</h3>
+          <p data-i18n="feat_client_desc">كل شيء يشتغل في متصفحك. مفاتيح API تبقى عندك فقط، ما ترسَل لأي مكان.</p>
+        </div>
+
+        <div class="feature-card">
+          <span class="feature-icon">📦</span>
+          <h3 data-i18n="feat_formats_title">تصدير متعدد</h3>
+          <p data-i18n="feat_formats_desc">صدّر كـ YAML خام أو Docker Compose أو Systemd Service — بضغطة واحدة.</p>
+        </div>
+
+        <div class="feature-card">
+          <span class="feature-icon">🔗</span>
+          <h3 data-i18n="feat_share_title">مشاركة بـ URL</h3>
+          <p data-i18n="feat_share_desc">كوّد إعداداتك في رابط قابل للمشاركة مع أصدقائك.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tasks Section -->
+  <section style="padding: var(--space-xl); padding-top: 0;">
+    <div class="container">
+      <h2 class="text-center mb-lg" data-i18n="tasks_section_title">المهام المدعومة</h2>
+
+      <div class="grid grid-4 stagger-children" id="tasks-mini-grid">
+        <!-- Injected by JS -->
+      </div>
+
+      <div class="text-center mt-xl">
+        <a href="pages/builder.html" class="btn btn-gold btn-lg" data-i18n="cta_start">
+          ابدأ البناء الآن
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Start Section -->
+  <section style="padding: var(--space-xl); padding-top: 0;">
+    <div class="container">
+      <div class="card card-gold" style="max-width: 800px; margin: 0 auto;">
+        <h2 class="text-gold mb-md">⚡ ابدأ في 3 خطوات</h2>
+        <ol style="list-style: none; counter-reset: steps; display: flex; flex-direction: column; gap: var(--space-md);">
+          <li style="display: flex; gap: var(--space-md); align-items: flex-start;">
+            <span style="background: var(--accent-gold); color: var(--bg-deep); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; flex-shrink: 0;">1</span>
+            <div>
+              <strong style="color: var(--text-white);">أدخل Steam ID و Telegram Chat ID</strong>
+              <p style="margin: 0; font-size: 0.9rem; color: var(--text-secondary);">من صفحة builder.html</p>
+            </div>
+          </li>
+          <li style="display: flex; gap: var(--space-md); align-items: flex-start;">
+            <span style="background: var(--accent-gold); color: var(--bg-deep); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; flex-shrink: 0;">2</span>
+            <div>
+              <strong style="color: var(--text-white);">فعّل المهام التي تريدها وخصّصها</strong>
+              <p style="margin: 0; font-size: 0.9rem; color: var(--text-secondary);">كل مهمة قابلة للتخصيص الكامل</p>
+            </div>
+          </li>
+          <li style="display: flex; gap: var(--space-md); align-items: flex-start;">
+            <span style="background: var(--accent-gold); color: var(--bg-deep); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; flex-shrink: 0;">3</span>
+            <div>
+              <strong style="color: var(--text-white);">صدّر وانشر على السيرفر</strong>
+              <p style="margin: 0; font-size: 0.9rem; color: var(--text-secondary);">YAML / Docker / Systemd — جاهز للنشر</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ── Footer ── -->
+<footer class="footer" id="footer-host"></footer>
+
+<script type="module">
+  import { initPage, getLang } from './js/app.js';
+  import { TASKS_REGISTRY } from './js/tasks-registry.js';
+  import { t } from './js/i18n.js';
+
+  initPage('home');
+
+  // Render task mini-cards
+  const grid = document.getElementById('tasks-mini-grid');
+  if (grid) {
+    const lang = getLang();
+    grid.innerHTML = TASKS_REGISTRY.map(task => `
+      <div class="task-mini-card">
+        <span class="task-mini-icon">${task.icon}</span>
+        <div class="task-mini-name">${task.name[lang] || task.name.ar}</div>
+        <div class="task-mini-schedule" dir="ltr">${task.scheduleHuman[lang] || task.scheduleHuman.ar}</div>
+        <div class="task-mini-output">
+          <span class="badge ${task.outputFormat === 'image' ? 'badge-blue' : 'badge-gray'}">
+            ${task.outputFormat === 'image' ? t('output_image', lang) : t('output_text', lang)}
+          </span>
+          ${task.privacyHigh ? '<span class="badge badge-red" style="margin-right:4px">🔒</span>' : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Listen for lang changes to re-render
+  document.addEventListener('state-changed', () => {
+    const lang = getLang();
+    const grid = document.getElementById('tasks-mini-grid');
+    if (grid) {
+      grid.innerHTML = TASKS_REGISTRY.map(task => `
+        <div class="task-mini-card">
+          <span class="task-mini-icon">${task.icon}</span>
+          <div class="task-mini-name">${task.name[lang] || task.name.ar}</div>
+          <div class="task-mini-schedule" dir="ltr">${task.scheduleHuman[lang] || task.scheduleHuman.ar}</div>
+          <div class="task-mini-output">
+            <span class="badge ${task.outputFormat === 'image' ? 'badge-blue' : 'badge-gray'}">
+              ${task.outputFormat === 'image' ? t('output_image', lang) : t('output_text', lang)}
+            </span>
+            ${task.privacyHigh ? '<span class="badge badge-red" style="margin-right:4px">🔒</span>' : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+  });
+</script>
+</body>
+</html>

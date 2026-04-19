@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#2a475e"/>
+      <stop offset="100%" stop-color="#1b2838"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="60" cy="60" r="58" fill="url(#bgGrad)" stroke="#66c0f4" stroke-width="1.5" opacity="0.4"/>
+
+  <!-- Gear teeth (12 teeth) -->
+  <g fill="#66c0f4" opacity="0.85">
+    <rect x="56" y="2" width="8" height="12" rx="2"/>
+    <rect x="56" y="106" width="8" height="12" rx="2"/>
+    <rect x="2" y="56" width="12" height="8" rx="2"/>
+    <rect x="106" y="56" width="12" height="8" rx="2"/>
+    <rect x="17" y="14" width="8" height="12" rx="2" transform="rotate(45 21 20)"/>
+    <rect x="87" y="94" width="8" height="12" rx="2" transform="rotate(45 91 100)"/>
+    <rect x="14" y="87" width="12" height="8" rx="2" transform="rotate(-45 20 91)"/>
+    <rect x="94" y="17" width="12" height="8" rx="2" transform="rotate(-45 100 21)"/>
+  </g>
+
+  <!-- Outer ring -->
+  <circle cx="60" cy="60" r="48" fill="none" stroke="#66c0f4" stroke-width="2" opacity="0.6"/>
+
+  <!-- Inner circle background -->
+  <circle cx="60" cy="60" r="40" fill="#1b2838"/>
+  <circle cx="60" cy="60" r="39" fill="none" stroke="#c7a008" stroke-width="1" opacity="0.4"/>
+
+  <!-- Letter S (golden) -->
+  <text x="60" y="73" text-anchor="middle" font-family="'Segoe UI', sans-serif" font-size="46" font-weight="900" fill="#c7a008" filter="url(#glow)" letter-spacing="-2">S</text>
+
+  <!-- Clock hands (pointing to 2:15) -->
+  <!-- Hour hand → 2 o'clock = 60deg -->
+  <line x1="60" y1="60" x2="74" y2="48" stroke="#66c0f4" stroke-width="2.5" stroke-linecap="round" opacity="0.9"/>
+  <!-- Minute hand → 15min = 90deg (3 o'clock) -->
+  <line x1="60" y1="60" x2="78" y2="60" stroke="#66c0f4" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
+
+  <!-- Center dot -->
+  <circle cx="60" cy="60" r="3.5" fill="#c7a008"/>
+</svg>
