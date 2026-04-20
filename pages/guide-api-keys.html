@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>دليل مفاتيح API — Steam Cron Studio</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@400;700&family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/steam-theme.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .guide-main { padding: calc(var(--nav-height) + var(--space-xl)) var(--space-xl) var(--space-2xl); max-width: 860px; margin: 0 auto; }
+
+    /* TOC */
+    .toc { background: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-lg); padding: var(--space-lg); margin-bottom: var(--space-2xl); }
+    .toc-title { font-weight: 700; color: var(--accent-gold); margin-bottom: var(--space-md); }
+    .toc-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .toc-list li a { color: var(--text-secondary); font-size: 0.9rem; display: flex; align-items: center; gap: var(--space-sm); transition: color var(--transition-fast); }
+    .toc-list li a:hover { color: var(--accent-blue); }
+    .toc-num { width: 22px; height: 22px; border-radius: 50%; background: rgba(102,192,244,0.12); color: var(--accent-blue); font-size: 0.72rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+    /* Guide sections */
+    .guide-section { margin-bottom: var(--space-2xl); scroll-margin-top: calc(var(--nav-height) + var(--space-lg)); }
+    .guide-section-header { display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-xl); padding-bottom: var(--space-md); border-bottom: 2px solid var(--border-card); }
+    .guide-section-num { width: 44px; height: 44px; border-radius: 50%; background: var(--accent-gold); color: var(--bg-deep); font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .guide-section-title { font-size: 1.4rem; font-weight: 800; color: var(--text-white); }
+    .guide-section-sub { font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px; }
+
+    /* Steps */
+    .steps-list { display: flex; flex-direction: column; gap: var(--space-lg); }
+    .step-item { display: flex; gap: var(--space-lg); align-items: flex-start; }
+    .step-dot { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--accent-blue); color: var(--accent-blue); font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+    .step-content { flex: 1; }
+    .step-content h4 { color: var(--text-white); font-size: 1rem; margin-bottom: var(--space-xs); }
+    .step-content p  { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: var(--space-sm); line-height: 1.65; }
+    .step-content p:last-child { margin-bottom: 0; }
+
+    /* Inline code */
+    .ic { background: rgba(0,0,0,0.4); border: 1px solid var(--border-card); border-radius: 4px; padding: 2px 6px; font-family: var(--font-mono); font-size: 0.82em; color: var(--accent-blue); }
+
+    /* Link button */
+    .link-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px var(--space-md); border: 1px solid var(--border-card); border-radius: var(--radius-sm); color: var(--accent-blue); font-size: 0.85rem; transition: all var(--transition-fast); }
+    .link-btn:hover { border-color: var(--accent-blue); background: rgba(102,192,244,0.08); color: var(--accent-blue); }
+
+    /* Warning box */
+    .warn-box { background: rgba(169,68,66,0.08); border: 1px solid rgba(169,68,66,0.3); border-radius: var(--radius-md); padding: var(--space-md) var(--space-lg); margin-top: var(--space-md); font-size: 0.875rem; color: #d4706e; }
+    .warn-box b { color: var(--accent-red); }
+
+    /* Telegram chat ID finder */
+    .chat-id-tip { background: rgba(102,192,244,0.06); border: 1px solid rgba(102,192,244,0.2); border-radius: var(--radius-md); padding: var(--space-md); margin-top: var(--space-md); }
+    .chat-id-tip-title { font-weight: 700; color: var(--accent-blue); margin-bottom: var(--space-sm); font-size: 0.9rem; }
+
+    /* SteamID finder tool */
+    .steamid-tool { background: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: var(--space-lg); margin-top: var(--space-md); }
+    .steamid-row  { display: flex; gap: var(--space-sm); margin-bottom: var(--space-sm); }
+    .steamid-in   { flex: 1; padding: 8px var(--space-md); background: rgba(0,0,0,0.3); border: 1px solid var(--border-card); border-radius: var(--radius-sm); color: var(--text-white); font-family: var(--font-arabic); font-size: 0.9rem; outline: none; }
+    .steamid-in:focus { border-color: var(--accent-blue); }
+    .steamid-result { font-family: var(--font-mono); font-size: 1rem; color: var(--accent-blue); padding: var(--space-sm) var(--space-md); background: rgba(0,0,0,0.3); border-radius: var(--radius-sm); border: 1px solid var(--border-card); display: none; word-break: break-all; }
+  </style>
+</head>
+<body>
+<nav class="nav" id="nav-host"></nav>
+
+<main class="guide-main">
+  <div style="margin-bottom:var(--space-xl)">
+    <h1 style="font-size:clamp(1.8rem,4vw,2.5rem)">🔑 دليل مفاتيح API</h1>
+    <p style="color:var(--text-secondary);margin-top:var(--space-sm)">دليل خطوة بخطوة للحصول على كل المفاتيح التي تحتاجها لتشغيل المهام.</p>
+  </div>
+
+  <!-- TOC -->
+  <div class="toc">
+    <div class="toc-title">📋 المحتويات</div>
+    <ul class="toc-list">
+      <li><a href="#steam-id"><span class="toc-num">1</span> إيجاد SteamID64 الخاص بك</a></li>
+      <li><a href="#steam-api"><span class="toc-num">2</span> Steam Web API Key</a></li>
+      <li><a href="#telegram-bot"><span class="toc-num">3</span> Telegram Bot Token</a></li>
+      <li><a href="#telegram-chat"><span class="toc-num">4</span> Telegram Chat ID</a></li>
+      <li><a href="#itad"><span class="toc-num">5</span> ITAD API Key (اختياري — للمهمة 7)</a></li>
+      <li><a href="#security"><span class="toc-num">6</span> الأمان وحماية المفاتيح</a></li>
+    </ul>
+  </div>
+
+  <!-- Section 1: Steam ID -->
+  <div class="guide-section" id="steam-id">
+    <div class="guide-section-header">
+      <div class="guide-section-num">1</div>
+      <div>
+        <div class="guide-section-title">🎮 إيجاد SteamID64</div>
+        <div class="guide-section-sub">رقم فريد من 17 خانة يبدأ بـ 7656119</div>
+      </div>
+    </div>
+
+    <div class="steps-list">
+      <div class="step-item">
+        <div class="step-dot">A</div>
+        <div class="step-content">
+          <h4>من رابط الملف الشخصي</h4>
+          <p>افتح Steam → اضغط على اسمك → "عرض ملفي الشخصي" → انسخ الرابط.</p>
+          <p>إذا كان الرابط: <span class="ic">steamcommunity.com/id/USERNAME</span><br>
+          استخدم الأداة أدناه لتحويله.</p>
+          <p>إذا كان الرابط: <span class="ic">steamcommunity.com/profiles/76561198XXXXXXXXX</span><br>
+          الرقم بعد <span class="ic">/profiles/</span> هو SteamID64 مباشرةً.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-dot">B</div>
+        <div class="step-content">
+          <h4>من Steam Desktop App</h4>
+          <p>افتح Steam → اضغط اسمك → <b>Settings</b> → <b>Account</b> → تجد "Steam ID" ظاهراً.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick finder tool -->
+    <div class="steamid-tool">
+      <div style="font-weight:700;color:var(--text-white);margin-bottom:var(--space-sm)">🔍 أداة سريعة — تحويل الرابط</div>
+      <div class="steamid-row">
+        <input type="text" class="steamid-in" id="profile-url-input" placeholder="steamcommunity.com/id/yourusername أو /profiles/76561198...">
+        <button class="btn btn-ghost btn-sm" id="extract-btn">استخرج</button>
+      </div>
+      <div class="steamid-result" id="extracted-id"></div>
+      <p style="font-size:0.78rem;color:var(--text-secondary);margin-top:var(--space-sm)">⚠️ إذا أدخلت Custom URL، ستحتاج استخدام <a href="https://steamid.io" target="_blank" rel="noopener">steamid.io</a> للتحويل.</p>
+    </div>
+  </div>
+
+  <!-- Section 2: Steam API Key -->
+  <div class="guide-section" id="steam-api">
+    <div class="guide-section-header">
+      <div class="guide-section-num">2</div>
+      <div>
+        <div class="guide-section-title">🔧 Steam Web API Key</div>
+        <div class="guide-section-sub">مجاني — يتطلب حساب Steam غير مقيّد</div>
+      </div>
+    </div>
+
+    <div class="steps-list">
+      <div class="step-item">
+        <div class="step-dot">1</div>
+        <div class="step-content">
+          <h4>افتح صفحة طلب المفتاح</h4>
+          <p><a class="link-btn" href="https://steamcommunity.com/dev/apikey" target="_blank" rel="noopener">↗ steamcommunity.com/dev/apikey</a></p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-dot">2</div>
+        <div class="step-content">
+          <h4>أدخل اسم النطاق</h4>
+          <p>في حقل "Domain Name" أدخل أي نطاق — مثلاً <span class="ic">localhost</span> أو اسمك.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-dot">3</div>
+        <div class="step-content">
+          <h4>انسخ المفتاح</h4>
+          <p>ستحصل على مفتاح بصيغة: <span class="ic">XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</span> (32 حرف).</p>
+          <p>ضعه في متغير البيئة: <span class="ic">STEAM_WEB_API_KEY=your_key_here</span></p>
+        </div>
+      </div>
+    </div>
+    <div class="warn-box"><b>⚠️ تنبيه:</b> حساب Steam يحتاج أن لا يكون مقيّداً (محدود). الحسابات الجديدة التي لم تُنفق فيها 5$ قد تكون مقيّدة.</div>
+  </div>
+
+  <!-- Section 3: Telegram Bot -->
+  <div class="guide-section" id="telegram-bot">
+    <div class="guide-section-header">
+      <div class="guide-section-num">3</div>
+      <div>
+        <div class="guide-section-title">🤖 Telegram Bot Token</div>
+        <div class="guide-section-sub">أنشئ بوت مجاني عبر @BotFather</div>
+      </div>
+    </div>
+
+    <div class="steps-list">
+      <div class="step-item">
+        <div class="step-dot">1</div>
+        <div class="step-content">
+          <h4>افتح @BotFather</h4>
+          <p><a class="link-btn" href="https://t.me/BotFather" target="_blank" rel="noopener">↗ t.me/BotFather</a></p>
+          <p>أرسل: <span class="ic">/newbot</span></p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-dot">2</div>
+        <div class="step-content">
+          <h4>اختر اسم البوت</h4>
+          <p>مثلاً: <span class="ic">My Steam Monitor</span></p>
+          <p>ثم اختر username ينتهي بـ <span class="ic">_bot</span> مثل: <span class="ic">my_steam_bot</span></p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-dot">3</div>
+        <div class="step-content">
+          <h4>انسخ التوكن</h4>
+          <p>سيعطيك BotFather رسالة تحتوي على: <span class="ic">1234567890:ABCDEFGxxxxxxxxxxxxxxxxxx</span></p>
+          <p>ضعه في متغير البيئة: <span class="ic">OPENCLAW_TELEGRAM_BOT_TOKEN=your_token</span></p>
+        </div>
+      </div>
+    </div>
+    <div class="warn-box"><b>⚠️ مهم:</b> لا تشارك هذا التوكن مع أي أحد. من يملكه يتحكم في بوتك بالكامل.</div>
+  </div>
+
+  <!-- Section 4: Telegram Chat ID -->
+  <div class="guide-section" id="telegram-chat">
+    <div class="guide-section-header">
+      <div class="guide-section-num">4</div>
+      <div>
+        <div class="guide-section-title">💬 Telegram Chat ID</div>
+        <div class="guide-section-sub">رقم المحادثة التي ترسل إليها الإشعارات</div>
+      </div>
+    </div>
+
+    <div class="steps-list">
+      <div class="step-item">
+        <div class="step-dot">1</div>
+        <div class="step-content">
+          <h4>أرسل رسالة لبوتك</h4>
+          <p>ابحث عن بوتك في Telegram، اضغط Start، وأرسل أي رسالة.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-dot">2</div>
+        <div class="step-content">
+          <h4>استرجع الـ Chat ID</h4>
+          <p>افتح هذا الرابط في المتصفح (استبدل TOKEN بتوكنك):</p>
+          <p><span class="ic">https://api.telegram.org/botTOKEN/getUpdates</span></p>
+          <p>في الاستجابة ابحث عن: <span class="ic">"chat": {"id": 123456789}</span></p>
+          <p>هذا الرقم هو Chat ID.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-id-tip">
+      <div class="chat-id-tip-title">💡 طريقة أسهل</div>
+      <p style="font-size:0.875rem;color:var(--text-secondary);margin:0">
+        أرسل رسالة لـ <a href="https://t.me/userinfobot" target="_blank" rel="noopener" style="color:var(--accent-blue)">@userinfobot</a> —
+        سيرد عليك برقم الـ Chat ID مباشرةً.
+      </p>
+    </div>
+  </div>
+
+  <!-- Section 5: ITAD -->
+  <div class="guide-section" id="itad">
+    <div class="guide-section-header">
+      <div class="guide-section-num">5</div>
+      <div>
+        <div class="guide-section-title">🔀 ITAD API Key <span class="badge badge-gray" style="font-size:0.65rem;vertical-align:middle">اختياري</span></div>
+        <div class="guide-section-sub">فقط للمهمة 7 — مقارنة المتاجر</div>
+      </div>
+    </div>
+
+    <div class="steps-list">
+      <div class="step-item">
+        <div class="step-dot">1</div>
+        <div class="step-content">
+          <h4>افتح IsThereAnyDeal</h4>
+          <p><a class="link-btn" href="https://isthereanydeal.com/apps/my/" target="_blank" rel="noopener">↗ isthereanydeal.com/apps/my</a></p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-dot">2</div>
+        <div class="step-content">
+          <h4>أنشئ حساباً وطلب API Key</h4>
+          <p>سجّل مجاناً ثم اذهب إلى "My Apps" → "Create new app".</p>
+          <p>أدخل اسماً مثل: <span class="ic">OpenClaw Steam Monitor</span></p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-dot">3</div>
+        <div class="step-content">
+          <h4>انسخ المفتاح</h4>
+          <p>ضعه في: <span class="ic">ITAD_API_KEY=your_key_here</span></p>
+          <p>ثم فعّل المهمة 7 من Builder.</p>
+        </div>
+      </div>
+    </div>
+    <div class="alert alert-info" style="margin-top:var(--space-md)">
+      <span class="alert-icon">ℹ️</span>
+      <div class="alert-content">المهمة 7 معطّلة افتراضياً في الـ Builder. تُفعّل فقط عند إضافة ITAD Key.</div>
+    </div>
+  </div>
+
+  <!-- Section 6: Security -->
+  <div class="guide-section" id="security">
+    <div class="guide-section-header">
+      <div class="guide-section-num">6</div>
+      <div>
+        <div class="guide-section-title">🔒 الأمان وحماية المفاتيح</div>
+        <div class="guide-section-sub">قواعد أساسية يجب اتباعها</div>
+      </div>
+    </div>
+
+    <div class="grid grid-2" style="gap:var(--space-lg)">
+      <div class="card">
+        <h4 class="text-green mb-md">✅ افعل</h4>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;font-size:0.875rem;color:var(--text-secondary)">
+          <li>✅ ضع المفاتيح في ملف <span class="ic">.env</span> على السيرفر</li>
+          <li>✅ أضف <span class="ic">.env</span> إلى <span class="ic">.gitignore</span></li>
+          <li>✅ استخدم <span class="ic">${ENV_VAR}</span> في الـ YAML (لا المفاتيح الحقيقية)</li>
+          <li>✅ راجع أذونات البوت بانتظام من @BotFather</li>
+          <li>✅ احتفظ بنسخة احتياطية مشفّرة من المفاتيح</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4 class="text-red mb-md">❌ لا تفعل</h4>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;font-size:0.875rem;color:var(--text-secondary)">
+          <li>❌ لا تلصق المفاتيح مباشرةً في الـ YAML</li>
+          <li>❌ لا ترفع <span class="ic">.env</span> على GitHub</li>
+          <li>❌ لا تشارك التوكن مع أحد</li>
+          <li>❌ لا تكتبه في رسائل Telegram أو Discord</li>
+          <li>❌ لا تستخدم أدوات "Steam API key checker" مجهولة</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="warn-box" style="margin-top:var(--space-lg)">
+      <b>⚠️ إذا سرّبت مفتاحاً:</b> اذهب فوراً إلى الرابط المعني وأعد توليد المفتاح.
+      Steam API Key: <a href="https://steamcommunity.com/dev/apikey" target="_blank" rel="noopener" style="color:#d4706e">steamcommunity.com/dev/apikey</a> ← "Regenerate Key".
+      Telegram Bot Token: أرسل <span class="ic">/revoke</span> لـ @BotFather.
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="card card-gold text-center" style="margin-top:var(--space-xl);padding:var(--space-xl)">
+    <p style="color:var(--accent-gold);font-weight:700;font-size:1.1rem;margin-bottom:var(--space-md)">🎉 جمعت كل المفاتيح؟</p>
+    <a href="builder.html" class="btn btn-gold btn-lg">ابدأ البناء الآن →</a>
+  </div>
+</main>
+
+<footer class="footer" id="footer-host"></footer>
+
+<script type="module">
+import { initPage } from '../js/app.js';
+initPage('guide-api');
+
+// Steam ID extractor tool
+document.getElementById('extract-btn').addEventListener('click', () => {
+  const input  = document.getElementById('profile-url-input').value.trim();
+  const result = document.getElementById('extracted-id');
+
+  // Match /profiles/STEAMID64
+  const m = input.match(/\/profiles\/(\d{17})/);
+  if (m) {
+    result.style.display = 'block';
+    result.innerHTML = `✅ SteamID64: <b>${m[1]}</b> <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('${m[1]}').then(()=>this.textContent='✓')" style="margin-right:8px">نسخ</button>`;
+    return;
+  }
+
+  // Match /id/username — extract username only
+  const m2 = input.match(/\/id\/([a-zA-Z0-9_-]+)/);
+  if (m2) {
+    result.style.display = 'block';
+    result.innerHTML = `⚠️ Custom URL: <b>${m2[1]}</b> — استخدم <a href="https://steamid.io/lookup/${m2[1]}" target="_blank" rel="noopener" style="color:var(--accent-blue)">steamid.io</a> لتحويله`;
+    return;
+  }
+
+  // Maybe it's already a 17-digit ID
+  if (/^7656119\d{10}$/.test(input)) {
+    result.style.display = 'block';
+    result.innerHTML = `✅ SteamID64: <b>${input}</b> — يبدو صحيحاً!`;
+    return;
+  }
+
+  result.style.display = 'block';
+  result.innerHTML = `❌ لم أتعرف على الصيغة. أدخل رابط ملفك الشخصي كاملاً.`;
+});
+</script>
+</body>
+</html>

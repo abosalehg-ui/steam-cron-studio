@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مصفوفة التوافق — Steam Cron Studio</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@400;700&family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/steam-theme.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .compat-main { padding: calc(var(--nav-height) + var(--space-xl)) var(--space-xl) var(--space-2xl); max-width: 1200px; margin: 0 auto; }
+
+    /* Matrix Table */
+    .matrix-wrap { overflow-x: auto; border-radius: var(--radius-lg); border: 1px solid var(--border-card); }
+    .matrix-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; min-width: 800px; }
+
+    .matrix-table th {
+      padding: var(--space-sm) var(--space-md);
+      background: rgba(0,0,0,0.35);
+      color: var(--text-secondary); font-weight: 600;
+      border-bottom: 2px solid var(--border-card);
+      text-align: center; white-space: nowrap;
+    }
+    .matrix-table th.fw-col { text-align: start; min-width: 160px; }
+    .matrix-table th.task-header { writing-mode: vertical-rl; height: 90px; padding: var(--space-md) var(--space-sm); font-size: 0.8rem; }
+    body.lang-en .matrix-table th.task-header { writing-mode: horizontal-tb; height: auto; }
+
+    .matrix-table td { padding: var(--space-sm) var(--space-md); border-bottom: 1px solid rgba(102,192,244,0.05); text-align: center; transition: background var(--transition-fast); }
+    .matrix-table tr:hover td { background: rgba(102,192,244,0.03); }
+    .matrix-table td.fw-name { text-align: start; }
+
+    .fw-cell { display: flex; align-items: center; gap: var(--space-sm); }
+    .fw-icon { font-size: 1.3rem; flex-shrink: 0; }
+    .fw-info { }
+    .fw-title { font-weight: 700; color: var(--text-white); font-size: 0.9rem; }
+    .fw-sub   { font-size: 0.75rem; color: var(--text-secondary); }
+
+    .compat-icon { font-size: 1.15rem; cursor: help; }
+
+    /* Legend */
+    .legend { display: flex; gap: var(--space-xl); flex-wrap: wrap; margin-bottom: var(--space-xl); }
+    .legend-item { display: flex; align-items: center; gap: var(--space-sm); font-size: 0.85rem; color: var(--text-secondary); }
+    .legend-icon { font-size: 1.2rem; }
+
+    /* Framework detail cards */
+    .fw-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-lg); margin-top: var(--space-2xl); }
+    @media(max-width:900px){ .fw-cards { grid-template-columns: repeat(2,1fr); } }
+    @media(max-width:600px){ .fw-cards { grid-template-columns: 1fr; } }
+
+    .fw-card { background: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius-lg); padding: var(--space-lg); transition: all var(--transition-base); }
+    .fw-card:hover { border-color: rgba(102,192,244,0.3); transform: translateY(-2px); }
+    .fw-card-header { display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-md); }
+    .fw-card-icon { font-size: 2rem; }
+    .fw-card-name { font-size: 1.1rem; font-weight: 800; color: var(--text-white); }
+    .fw-card-score { font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px; }
+    .fw-notes { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; }
+    .fw-notes b { color: var(--text-primary); }
+    .fw-badge-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: var(--space-sm); }
+
+    /* Score bar */
+    .score-bar { display: flex; align-items: center; gap: var(--space-sm); margin-top: var(--space-sm); }
+    .score-track { flex: 1; height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; }
+    .score-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+    .score-label { font-size: 0.75rem; color: var(--text-secondary); min-width: 28px; text-align: end; }
+
+    /* Task icon strip */
+    .task-strip { display: flex; gap: 4px; flex-wrap: wrap; margin-top: var(--space-sm); }
+    .task-dot { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; border: 1px solid transparent; }
+    .task-dot.full    { background: rgba(92,126,16,0.2);    border-color: rgba(92,126,16,0.4); }
+    .task-dot.partial { background: rgba(199,160,8,0.15);   border-color: rgba(199,160,8,0.35); }
+    .task-dot.none    { background: rgba(143,152,160,0.08); border-color: rgba(143,152,160,0.2); opacity:0.5; }
+  </style>
+</head>
+<body>
+<nav class="nav" id="nav-host"></nav>
+
+<main class="compat-main">
+  <div style="margin-bottom:var(--space-xl)">
+    <h1 style="font-size:clamp(1.8rem,4vw,2.5rem)">🤝 مصفوفة التوافق</h1>
+    <p style="color:var(--text-secondary);margin-top:var(--space-sm)">
+      مقارنة دعم الـ 8 مهام عبر 6 أطر عمل — من OpenClaw الكامل إلى Python + cron البسيط.
+    </p>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item"><span class="legend-icon">✅</span> دعم كامل — out of the box</div>
+    <div class="legend-item"><span class="legend-icon">⚠️</span> جزئي — يحتاج إعداد إضافي</div>
+    <div class="legend-item"><span class="legend-icon">❌</span> غير مدعوم حالياً</div>
+    <div class="legend-item"><span class="legend-icon">🖼️</span> مهام الصور (1، 3، 8) — تحتاج Playwright</div>
+  </div>
+
+  <!-- Matrix Table -->
+  <div class="matrix-wrap">
+    <table class="matrix-table" id="matrix-table">
+      <!-- Injected by JS -->
+    </table>
+  </div>
+
+  <!-- Framework Detail Cards -->
+  <h2 style="margin-top:var(--space-2xl);margin-bottom:var(--space-lg)">📋 تفاصيل كل إطار</h2>
+  <div class="fw-cards" id="fw-cards">
+    <!-- Injected by JS -->
+  </div>
+
+  <!-- Notes section -->
+  <div class="card" style="margin-top:var(--space-xl)">
+    <h3 class="text-gold mb-md">ℹ️ ملاحظات مهمة</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-lg)">
+      <div>
+        <h4 style="color:var(--text-white);margin-bottom:var(--space-sm)">🖼️ مهام الصور (1، 3، 8)</h4>
+        <p style="font-size:0.875rem;color:var(--text-secondary)">
+          تحتاج <b style="color:var(--text-primary)">Playwright + Chromium</b> لتصوير صفحات HTML.
+          في n8n وCrewAI يحتاج هذا إلى node Playwright مخصص أو subprocess call.
+          OpenClaw وLangGraph وAutogen تدير هذا تلقائياً.
+        </p>
+      </div>
+      <div>
+        <h4 style="color:var(--text-white);margin-bottom:var(--space-sm)">🔒 المهمة 6 — الخصوصية</h4>
+        <p style="font-size:0.875rem;color:var(--text-secondary)">
+          مهمة فرص الإهداء تحمل بيانات أصدقاء خاصة.
+          <b style="color:var(--accent-red)">يجب أن لا تُصيَّر كصورة</b> في أي إطار عمل.
+          الـ YAML المولَّد يتضمن هذا التحذير صراحةً.
+        </p>
+      </div>
+      <div>
+        <h4 style="color:var(--text-white);margin-bottom:var(--space-sm)">⚠️ المهمة 7 — ITAD</h4>
+        <p style="font-size:0.875rem;color:var(--text-secondary)">
+          مقارنة المتاجر تتطلب <b style="color:var(--text-primary)">ITAD API Key</b> مجاني.
+          من <a href="https://isthereanydeal.com/apps/my/" target="_blank" rel="noopener">isthereanydeal.com/apps/my</a>
+        </p>
+      </div>
+      <div>
+        <h4 style="color:var(--text-white);margin-bottom:var(--space-sm)">📡 Steam CORS</h4>
+        <p style="font-size:0.875rem;color:var(--text-secondary)">
+          Steam Web API لا يدعم CORS في المتصفح.
+          هذا الموقع يستخدم <b style="color:var(--text-primary)">Steam Community XML</b>
+          (يدعم CORS). الـ YAML المولَّد يستخدم Steam Web API من السيرفر.
+        </p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer" id="footer-host"></footer>
+
+<script type="module">
+import { initPage, getLang } from '../js/app.js';
+import { TASKS_REGISTRY }   from '../js/tasks-registry.js';
+import { t } from '../js/i18n.js';
+
+initPage('compat');
+
+// ── Data ─────────────────────────────────────────────────────────
+const FRAMEWORKS = [
+  {
+    id: 'openclaw', icon: '🦀', name: 'OpenClaw', sub: 'Native agent',
+    score: 100, color: '#66c0f4',
+    notes: 'دعم كامل لجميع المهام. يدير Playwright تلقائياً. المرجع الأساسي لهذا الـ YAML.',
+    badges: ['Full Support', 'Native Playwright', 'Arabic RTL', 'Auto-scheduler'],
+    compat: [1,1,1,1,1,1,1,1], // 1=full, 0.5=partial, 0=none
+  },
+  {
+    id: 'langgraph', icon: '🔗', name: 'LangGraph', sub: 'Python / LangChain',
+    score: 95, color: '#c7a008',
+    notes: 'دعم كامل. يحتاج إضافة Playwright كـ tool. إدارة State ممتازة للمهمة 8.',
+    badges: ['Full Support', 'Playwright Tool', 'State Graph'],
+    compat: [1,1,1,1,1,1,1,1],
+  },
+  {
+    id: 'autogen', icon: '🤖', name: 'Autogen', sub: 'Microsoft',
+    score: 90, color: '#7b68ee',
+    notes: 'دعم كامل. مناسب للمهام متعددة الخطوات. يحتاج Playwright كـ tool منفصل.',
+    badges: ['Full Support', 'Multi-agent', 'Tool calling'],
+    compat: [1,1,1,1,1,1,1,1],
+  },
+  {
+    id: 'n8n', icon: '🔄', name: 'n8n', sub: 'Visual workflow',
+    score: 70, color: '#ff6b35',
+    notes: 'مهام النص مدعومة بالكامل. مهام الصور (1،3،8) تحتاج Execute Command node لـ Playwright. مهمة 8 معقدة.',
+    badges: ['Text Tasks ✅', 'Image Tasks ⚠️', 'Visual UI'],
+    compat: [0.5,1,0.5,1,1,1,1,0.5],
+  },
+  {
+    id: 'crewai', icon: '👥', name: 'CrewAI', sub: 'Role-based agents',
+    score: 72, color: '#5c7e10',
+    notes: 'مهام النص ممتازة. مهام الصور تحتاج custom tool لـ Playwright. المهمة 3 و8 تحتاج agent منفصل.',
+    badges: ['Text Tasks ✅', 'Image Tasks ⚠️', 'Multi-crew'],
+    compat: [0.5,1,0.5,1,1,1,1,0.5],
+  },
+  {
+    id: 'python_cron', icon: '🐍', name: 'Python + cron', sub: 'Plain scripts',
+    score: 85, color: '#8fb940',
+    notes: 'دعم كامل بمرونة عالية. تتحكم في كل شيء مباشرة. يحتاج كتابة الـ scheduler يدوياً.',
+    badges: ['Full Control', 'Any library', 'crontab'],
+    compat: [1,1,1,1,1,1,1,1],
+  },
+];
+
+const COMPAT_ICONS = { 1: '✅', 0.5: '⚠️', 0: '❌' };
+const COMPAT_TIPS  = {
+  1:   'دعم كامل — يعمل مباشرةً',
+  0.5: 'جزئي — يحتاج إعداد إضافي',
+  0:   'غير مدعوم',
+};
+
+// ── Build Matrix ──────────────────────────────────────────────
+function buildMatrix() {
+  const lang  = getLang();
+  const table = document.getElementById('matrix-table');
+
+  // Header row
+  const taskHeaders = TASKS_REGISTRY.map(task =>
+    `<th class="task-header" title="${task.name[lang] || task.name.ar}">
+       ${task.icon}<br><span style="font-size:0.72rem">${task.id.replace('steam_','').replace(/_/g,' ')}</span>
+     </th>`
+  ).join('');
+
+  let html = `<thead><tr>
+    <th class="fw-col">الإطار</th>
+    ${taskHeaders}
+    <th>النتيجة</th>
+  </tr></thead><tbody>`;
+
+  for (const fw of FRAMEWORKS) {
+    const cells = fw.compat.map((c, i) => {
+      const task = TASKS_REGISTRY[i];
+      const icon = COMPAT_ICONS[c];
+      const tip  = COMPAT_TIPS[c];
+      return `<td><span class="compat-icon" title="${task.name.ar} — ${tip}">${icon}</span></td>`;
+    }).join('');
+
+    const full    = fw.compat.filter(c => c === 1).length;
+    const partial = fw.compat.filter(c => c === 0.5).length;
+    const scoreColor = fw.score >= 90 ? '#8fb940' : fw.score >= 75 ? '#c7a008' : '#ff6b35';
+
+    html += `<tr>
+      <td class="fw-name">
+        <div class="fw-cell">
+          <span class="fw-icon">${fw.icon}</span>
+          <div class="fw-info">
+            <div class="fw-title">${fw.name}</div>
+            <div class="fw-sub">${fw.sub}</div>
+          </div>
+        </div>
+      </td>
+      ${cells}
+      <td>
+        <span style="color:${scoreColor};font-weight:700;font-size:0.9rem">${fw.score}%</span><br>
+        <span style="font-size:0.72rem;color:var(--text-secondary)">${full}✅ ${partial>0?partial+'⚠️':''}</span>
+      </td>
+    </tr>`;
+  }
+
+  html += '</tbody>';
+  table.innerHTML = html;
+}
+
+// ── Build FW Cards ────────────────────────────────────────────
+function buildCards() {
+  const container = document.getElementById('fw-cards');
+  const lang      = getLang();
+
+  container.innerHTML = FRAMEWORKS.map(fw => {
+    const scoreColor = fw.score >= 90 ? fw.color : fw.score >= 75 ? '#c7a008' : '#ff6b35';
+    const taskDots   = fw.compat.map((c, i) => {
+      const task  = TASKS_REGISTRY[i];
+      const cls   = c === 1 ? 'full' : c === 0.5 ? 'partial' : 'none';
+      return `<div class="task-dot ${cls}" title="${task.name.ar}">${task.icon}</div>`;
+    }).join('');
+
+    return `<div class="fw-card">
+      <div class="fw-card-header">
+        <span class="fw-card-icon">${fw.icon}</span>
+        <div>
+          <div class="fw-card-name">${fw.name}</div>
+          <div class="fw-card-score">${fw.sub}</div>
+        </div>
+      </div>
+      <div class="score-bar">
+        <div class="score-track">
+          <div class="score-fill" style="width:${fw.score}%;background:${scoreColor}"></div>
+        </div>
+        <div class="score-label" style="color:${scoreColor}">${fw.score}%</div>
+      </div>
+      <div class="task-strip" style="margin-top:var(--space-md)">${taskDots}</div>
+      <p class="fw-notes" style="margin-top:var(--space-md)">${fw.notes}</p>
+      <div class="fw-badge-row">
+        ${fw.badges.map(b => `<span class="badge badge-gray" style="font-size:0.72rem">${b}</span>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+buildMatrix();
+buildCards();
+document.addEventListener('state-changed', () => { buildMatrix(); buildCards(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مكتبة المهام — Steam Cron Studio</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@400;700&family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/steam-theme.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .lib-main { padding: calc(var(--nav-height) + var(--space-xl)) var(--space-xl) var(--space-2xl); max-width: 1200px; margin: 0 auto; }
+
+    /* Filter bar */
+    .filter-bar { display: flex; gap: var(--space-sm); flex-wrap: wrap; margin-bottom: var(--space-xl); align-items: center; }
+    .filter-pill {
+      padding: 6px var(--space-md); border-radius: var(--radius-pill);
+      border: 1px solid var(--border-card); background: transparent;
+      color: var(--text-secondary); font-size: 0.85rem; cursor: pointer;
+      font-family: var(--font-arabic); transition: all var(--transition-fast);
+    }
+    .filter-pill.active, .filter-pill:hover {
+      border-color: var(--accent-blue); color: var(--accent-blue);
+      background: rgba(102,192,244,0.08);
+    }
+    .filter-pill.active { font-weight: 700; }
+
+    /* Task detail cards */
+    .task-card-full {
+      background: var(--bg-card); border: 1px solid var(--border-card);
+      border-radius: var(--radius-lg); overflow: hidden; margin-bottom: var(--space-xl);
+      transition: border-color var(--transition-fast);
+    }
+    .task-card-full:hover { border-color: rgba(102,192,244,0.3); }
+    .task-card-full[data-privacy="true"] { border-color: rgba(169,68,66,0.25); }
+    .task-card-full[data-itad="true"]    { border-color: rgba(199,160,8,0.25); }
+
+    .task-header {
+      display: flex; align-items: center; gap: var(--space-lg);
+      padding: var(--space-xl); border-bottom: 1px solid var(--border-card);
+      background: rgba(0,0,0,0.1);
+    }
+    .task-icon-big { font-size: 3rem; flex-shrink: 0; }
+    .task-header-info { flex: 1; }
+    .task-header-name { font-size: 1.6rem; font-weight: 800; color: var(--text-white); }
+    .task-header-id { font-family: var(--font-mono); font-size: 0.82rem; color: var(--text-secondary); margin-top: 4px; }
+    .task-header-meta { display: flex; gap: var(--space-sm); flex-wrap: wrap; margin-top: var(--space-sm); }
+
+    .task-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+    @media(max-width:768px){ .task-body { grid-template-columns: 1fr; } }
+
+    .task-section { padding: var(--space-lg) var(--space-xl); border-bottom: 1px solid var(--border-card); }
+    .task-section:nth-child(even) { border-right: 1px solid var(--border-card); }
+    .task-section:nth-child(odd):not(.full-width)  { }
+    .task-section.full-width { grid-column: 1 / -1; }
+    .task-section-title { font-size: 0.8rem; font-weight: 700; color: var(--accent-blue); letter-spacing: 1px; text-transform: uppercase; margin-bottom: var(--space-md); }
+
+    .info-row { display: flex; gap: var(--space-sm); align-items: flex-start; margin-bottom: var(--space-sm); font-size: 0.9rem; }
+    .info-key { color: var(--text-secondary); min-width: 120px; flex-shrink: 0; }
+    .info-val { color: var(--text-primary); }
+    .info-val b { color: var(--text-white); }
+
+    /* Config table */
+    .cfg-table { width: 100%; font-size: 0.85rem; }
+    .cfg-table tr { border-bottom: 1px solid rgba(102,192,244,0.07); }
+    .cfg-table td { padding: 6px var(--space-sm); }
+    .cfg-table td:first-child { color: var(--text-secondary); font-family: var(--font-mono); }
+    .cfg-table td:nth-child(2) { color: var(--accent-blue); text-align: center; }
+    .cfg-table td:nth-child(3) { color: var(--text-primary); text-align: center; }
+
+    /* Telegram preview in library */
+    .tg-mini {
+      background: #1a2535; border-radius: 10px; padding: var(--space-md);
+      font-size: 0.82rem; line-height: 1.65; color: #c9d1d9;
+      white-space: pre-wrap; word-break: break-word;
+      border: 1px solid rgba(102,192,244,0.08);
+    }
+    .tg-mini b { color: #fff; }
+    .tg-mini i { color: #8b949e; }
+    .tg-mini a { color: #58a6ff; }
+    .tg-mini s { text-decoration: line-through; opacity: 0.6; }
+
+    /* CTA bar */
+    .task-cta { padding: var(--space-md) var(--space-xl); display: flex; gap: var(--space-sm); align-items: center; background: rgba(0,0,0,0.1); }
+
+    /* Sources list */
+    .sources-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .sources-list li { font-size: 0.82rem; font-family: var(--font-mono); color: var(--text-secondary); padding: 4px var(--space-sm); background: rgba(0,0,0,0.2); border-radius: var(--radius-sm); border-right: 2px solid var(--accent-blue); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    body.lang-en .sources-list li { border-right: none; border-left: 2px solid var(--accent-blue); }
+
+    /* Search */
+    .search-wrap { position: relative; flex: 1; max-width: 320px; }
+    .search-wrap input { width: 100%; padding: 8px var(--space-md) 8px 36px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-card); border-radius: var(--radius-pill); color: var(--text-white); font-family: var(--font-arabic); font-size: 0.9rem; outline: none; }
+    body[dir="rtl"] .search-wrap input { padding: 8px 36px 8px var(--space-md); }
+    .search-wrap input:focus { border-color: var(--accent-blue); }
+    .search-icon { position: absolute; top: 50%; transform: translateY(-50%); left: 12px; color: var(--text-secondary); font-size: 0.9rem; pointer-events: none; }
+    body[dir="rtl"] .search-icon { left: auto; right: 12px; }
+  </style>
+</head>
+<body>
+<nav class="nav" id="nav-host"></nav>
+
+<main class="lib-main">
+  <div class="page-header" style="padding:0;border:none;text-align:start;margin-bottom:var(--space-lg)">
+    <h1 style="font-size:clamp(1.8rem,4vw,2.5rem)">📚 <span data-i18n="nav_library">مكتبة المهام</span></h1>
+    <p style="color:var(--text-secondary);margin-top:var(--space-sm)">استعرض الـ 8 مهام بالتفصيل — البيانات، الجداول، إعدادات التخصيص، ومعاينة رسائل Telegram.</p>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" placeholder="ابحث عن مهمة...">
+    </div>
+    <button class="filter-pill active" data-filter="all">الكل (8)</button>
+    <button class="filter-pill" data-filter="image">🖼️ صورة</button>
+    <button class="filter-pill" data-filter="text">📝 نص</button>
+    <button class="filter-pill" data-filter="daily">يومي</button>
+    <button class="filter-pill" data-filter="weekly">أسبوعي</button>
+    <button class="filter-pill" data-filter="privacy">🔒 خاص</button>
+  </div>
+
+  <!-- Task cards injected by JS -->
+  <div id="tasks-library"></div>
+</main>
+
+<footer class="footer" id="footer-host"></footer>
+
+<script type="module">
+import { initPage, getLang } from '../js/app.js';
+import { TASKS_REGISTRY }   from '../js/tasks-registry.js';
+import { cronToHuman }      from '../js/utils/cron-nl.js';
+import { t } from '../js/i18n.js';
+
+initPage('library');
+
+const DATA_SOURCES = {
+  steam_free_deals_daily: [
+    'store.steampowered.com/api/featuredcategories?cc=sa',
+    'store.steampowered.com/search/results/?specials=1&cc=sa',
+    'store.steampowered.com/api/appdetails?appids={id}&cc=sa',
+  ],
+  steam_wishlist_deals_daily: [
+    'api.steampowered.com/IWishlistService/GetWishlist/v1/',
+    'store.steampowered.com/wishlist/profiles/{id}/wishlistdata/',
+    'store.steampowered.com/api/appdetails?appids={id}&cc=sa',
+  ],
+  steam_game_of_the_week: [
+    'api.steampowered.com/IPlayerService/GetOwnedGames/v1/',
+    'api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v1/',
+    'api.steampowered.com/IFamilyGroupsService/GetSharedLibraryApps/v1/',
+    'store.steampowered.com/api/appdetails?appids={id}',
+  ],
+  steam_achievement_hunter: [
+    'api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v1/',
+    'api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/',
+    'api.steampowered.com/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/',
+    'api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/',
+  ],
+  steam_regional_price_intel: [
+    'store.steampowered.com/api/appdetails?appids={id}&cc={region}',
+    'api.exchangerate.host/latest?base=SAR',
+    'open.er-api.com/v6/latest/SAR',
+  ],
+  steam_gift_opportunities: [
+    'api.steampowered.com/ISteamUser/GetFriendList/v1/',
+    'api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/',
+    'store.steampowered.com/wishlist/profiles/{friend_id}/wishlistdata/',
+    'store.steampowered.com/api/appdetails?appids={id}&cc=sa',
+  ],
+  steam_cross_platform_prices: [
+    'api.isthereanydeal.com/games/lookup/v1 (ITAD)',
+    'api.isthereanydeal.com/games/prices/v3?country=SA (ITAD)',
+    'store.steampowered.com/api/appdetails?appids={id}&cc=sa',
+  ],
+  steam_weekly_wrapup: [
+    './state/free_deals_{date}.json (local)',
+    './state/wishlist_deals_{date}.json (local)',
+    './state/picks_history.json (local)',
+    'api.steampowered.com/IPlayerService/GetOwnedGames/v1/ (hit/miss)',
+    'api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/',
+  ],
+};
+
+const STATE_FILES = {
+  steam_free_deals_daily:    ['state/free_deals_{date}.json', 'state/wishlist.json (read)', 'state/owned_games.json (read)'],
+  steam_wishlist_deals_daily:['state/wishlist.json', 'state/wishlist_deals_{date}.json', 'state/owned_games.json (read)'],
+  steam_game_of_the_week:    ['state/owned_games.json', 'state/picks_history.json', 'state/renders/game_of_week_{date}.png'],
+  steam_achievement_hunter:  ['state/achievement_suggestions_history.json', 'state/achievement_pick_{date}.json'],
+  steam_regional_price_intel:['state/regional_intel_{date}.json', 'state/fx_rates.json'],
+  steam_gift_opportunities:  ['state/friends_wishlists.json', 'state/gift_opportunities_{date}.json'],
+  steam_cross_platform_prices:['state/itad_mappings.json', 'state/cross_platform_{date}.json', 'state/fx_rates.json (read)'],
+  steam_weekly_wrapup:       ['state/weekly_wrap_{date}.json', 'state/renders/weekly_wrap_{date}.png', 'state/archive/ (cleanup)'],
+};
+
+let activeFilter = 'all';
+let searchQuery  = '';
+
+function matchesFilter(task) {
+  const isDaily  = task.schedule.endsWith('* *') && task.schedule.split(' ')[2] === '*';
+  const isWeekly = !isDaily;
+  if (activeFilter === 'image'   && task.outputFormat !== 'image')  return false;
+  if (activeFilter === 'text'    && task.outputFormat !== 'text')   return false;
+  if (activeFilter === 'daily'   && !isDaily)                       return false;
+  if (activeFilter === 'weekly'  && !isWeekly)                      return false;
+  if (activeFilter === 'privacy' && !task.privacyHigh)              return false;
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    const nameAr = task.name.ar.toLowerCase();
+    const nameEn = task.name.en.toLowerCase();
+    const id     = task.id.toLowerCase();
+    if (!nameAr.includes(q) && !nameEn.includes(q) && !id.includes(q)) return false;
+  }
+  return true;
+}
+
+function renderLibrary() {
+  const lang      = getLang();
+  const container = document.getElementById('tasks-library');
+  const filtered  = TASKS_REGISTRY.filter(matchesFilter);
+
+  if (!filtered.length) {
+    container.innerHTML = `<div class="card text-center" style="padding:var(--space-2xl)"><p style="color:var(--text-secondary)">لا توجد مهام تطابق البحث</p></div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(task => {
+    const cfg     = task.configs;
+    const human   = cronToHuman(task.schedule);
+    const humanStr = lang === 'ar' ? (human.ar || human) : (human.en || human);
+    const sources  = DATA_SOURCES[task.id] || [];
+    const stateF   = STATE_FILES[task.id]  || [];
+
+    const cfgRows = cfg.map(c => {
+      const defVal = Array.isArray(c.default) ? c.default.join(', ') : String(c.default);
+      return `<tr>
+        <td>${c.key}</td>
+        <td>${c.type}</td>
+        <td>${defVal}</td>
+      </tr>`;
+    }).join('');
+
+    const tgPreview = task.telegramPreview({}, lang);
+    const tgHtml    = tgPreview
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/&lt;b&gt;/g,'<b>').replace(/&lt;\/b&gt;/g,'</b>')
+      .replace(/&lt;i&gt;/g,'<i>').replace(/&lt;\/i&gt;/g,'</i>')
+      .replace(/&lt;s&gt;/g,'<s>').replace(/&lt;\/s&gt;/g,'</s>')
+      .replace(/&lt;a href="[^"]*"&gt;/g,'<a href="#">').replace(/&lt;\/a&gt;/g,'</a>')
+      .replace(/\n/g,'<br>');
+
+    return `
+    <div class="task-card-full" data-task="${task.id}"
+         data-output="${task.outputFormat}"
+         data-privacy="${task.privacyHigh}"
+         data-itad="${task.requiresItad}">
+
+      <!-- Header -->
+      <div class="task-header">
+        <div class="task-icon-big">${task.icon}</div>
+        <div class="task-header-info">
+          <div class="task-header-name">${task.name[lang] || task.name.ar}</div>
+          <div class="task-header-id">${task.id}</div>
+          <div class="task-header-meta">
+            <span class="badge badge-blue">⏰ ${task.schedule}</span>
+            <span class="badge badge-gray">${humanStr}</span>
+            <span class="badge ${task.outputFormat === 'image' ? 'badge-blue' : 'badge-gray'}">
+              ${task.outputFormat === 'image' ? '🖼️ IMAGE' : '📝 TEXT'}
+            </span>
+            ${task.privacyHigh   ? '<span class="badge badge-red">🔒 خصوصية عالية</span>' : ''}
+            ${task.requiresItad  ? '<span class="badge badge-gold">⚠️ ITAD KEY</span>'    : ''}
+            ${task.defaultEnabled? '<span class="badge badge-green">✅ مفعّل افتراضياً</span>' : '<span class="badge badge-gray">⏸️ معطّل افتراضياً</span>'}
+          </div>
+        </div>
+      </div>
+
+      <!-- Body grid -->
+      <div class="task-body">
+
+        <!-- Description + Schedule -->
+        <div class="task-section">
+          <div class="task-section-title">الوصف</div>
+          <p style="font-size:0.9rem;color:var(--text-primary);margin-bottom:var(--space-md)">
+            ${task.description[lang] || task.description.ar}
+          </p>
+          <div class="info-row"><span class="info-key">الجدولة</span><span class="info-val"><b>${task.schedule}</b></span></div>
+          <div class="info-row"><span class="info-key">بالعربي</span><span class="info-val">${human.ar || humanStr}</span></div>
+          <div class="info-row"><span class="info-key">بالإنجليزي</span><span class="info-val">${human.en || humanStr}</span></div>
+          <div class="info-row"><span class="info-key">المخرج</span><span class="info-val">${task.outputFormat === 'image' ? '🖼️ صورة (Playwright)' : '📝 نص (sendMessage)'}</span></div>
+        </div>
+
+        <!-- Configs -->
+        <div class="task-section">
+          <div class="task-section-title">الإعدادات القابلة للتخصيص</div>
+          ${cfg.length ? `
+          <table class="cfg-table">
+            <thead>
+              <tr style="font-size:0.75rem;color:var(--text-secondary)">
+                <td>المفتاح</td><td>النوع</td><td>الافتراضي</td>
+              </tr>
+            </thead>
+            <tbody>${cfgRows}</tbody>
+          </table>` : '<p class="muted">لا توجد إعدادات إضافية</p>'}
+        </div>
+
+        <!-- Data Sources -->
+        <div class="task-section">
+          <div class="task-section-title">مصادر البيانات</div>
+          <ul class="sources-list">
+            ${sources.map(s => `<li title="${s}">${s}</li>`).join('')}
+          </ul>
+        </div>
+
+        <!-- State Files -->
+        <div class="task-section">
+          <div class="task-section-title">ملفات الحالة</div>
+          <ul class="sources-list">
+            ${stateF.map(f => `<li title="${f}">${f}</li>`).join('')}
+          </ul>
+          ${task.privacyHigh ? `
+          <div class="alert alert-danger" style="margin-top:var(--space-sm)">
+            <span class="alert-icon">🔒</span>
+            <div class="alert-content" style="font-size:0.82rem">بيانات الأصدقاء — لن تُصيَّر كصورة أبدًا</div>
+          </div>` : ''}
+        </div>
+
+        <!-- Telegram preview -->
+        <div class="task-section full-width">
+          <div class="task-section-title">معاينة رسالة Telegram</div>
+          <div style="display:flex;gap:var(--space-lg);align-items:flex-start;flex-wrap:wrap">
+            <div>
+              <div style="font-size:0.72rem;color:var(--text-secondary);margin-bottom:6px">🤖 OpenClaw Bot</div>
+              <div class="tg-mini">${tgHtml}</div>
+            </div>
+            <div style="flex:1;min-width:200px">
+              <div class="task-section-title">الخطوة الأخيرة</div>
+              ${task.outputFormat === 'image' ? `
+              <ol style="font-size:0.85rem;color:var(--text-secondary);padding-right:var(--space-md);display:flex;flex-direction:column;gap:6px">
+                <li>بناء HTML page بتصميم Steam</li>
+                <li>تصوير بـ Playwright (1080×1920 @2x)</li>
+                <li>إرسال PNG كـ sendPhoto</li>
+                <li>حذف HTML، الاحتفاظ بـ PNG لـ 30 يوم</li>
+              </ol>` : `
+              <ol style="font-size:0.85rem;color:var(--text-secondary);padding-right:var(--space-md);display:flex;flex-direction:column;gap:6px">
+                <li>تجميع النص بـ HTML formatting</li>
+                <li>POST /sendMessage مع parse_mode: HTML</li>
+                <li>معالجة أخطاء Bad Request</li>
+              </ol>`}
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- CTA bar -->
+      <div class="task-cta">
+        <a href="builder.html" class="btn btn-primary btn-sm">⚡ فعّل هذه المهمة</a>
+        <a href="compatibility.html" class="btn btn-ghost btn-sm">🤝 التوافق</a>
+        <span class="muted" style="margin-right:auto;font-size:0.8rem">${task.requiresItad ? '⚠️ يتطلب ITAD API Key' : '✅ يعمل مع Steam API فقط'}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Filter pills
+document.querySelectorAll('.filter-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    activeFilter = pill.dataset.filter;
+    renderLibrary();
+  });
+});
+
+// Search
+document.getElementById('search-input').addEventListener('input', e => {
+  searchQuery = e.target.value.trim();
+  renderLibrary();
+});
+
+// Initial render
+renderLibrary();
+
+// Re-render on language change
+document.addEventListener('state-changed', renderLibrary);
+</script>
+</body>
+</html>

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>دليل النشر — Steam Cron Studio</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@400;700&family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/steam-theme.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <style>
+    .guide-main { padding: calc(var(--nav-height) + var(--space-xl)) var(--space-xl) var(--space-2xl); max-width: 900px; margin: 0 auto; }
+
+    .method-tabs { display: flex; gap: var(--space-sm); margin-bottom: var(--space-xl); flex-wrap: wrap; }
+    .method-tab {
+      padding: var(--space-md) var(--space-xl); border-radius: var(--radius-lg);
+      border: 1px solid var(--border-card); background: var(--bg-card);
+      cursor: pointer; text-align: center; transition: all var(--transition-base);
+      flex: 1; min-width: 160px;
+    }
+    .method-tab:hover, .method-tab.active { border-color: var(--accent-blue); background: rgba(102,192,244,0.08); }
+    .method-tab.active { border-color: var(--accent-blue); }
+    .method-tab-icon { font-size: 1.8rem; margin-bottom: 4px; }
+    .method-tab-name { font-weight: 700; color: var(--text-white); font-size: 0.95rem; }
+    .method-tab-sub  { font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px; }
+
+    .method-content { display: none; }
+    .method-content.active { display: block; animation: fadeIn 250ms ease; }
+
+    /* Code blocks with copy */
+    .code-wrap { position: relative; border-radius: var(--radius-md); overflow: hidden; margin: var(--space-md) 0; }
+    .code-head { display: flex; justify-content: space-between; align-items: center; padding: 6px var(--space-md); background: rgba(0,0,0,0.5); border-bottom: 1px solid var(--border-card); }
+    .code-lang { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-secondary); }
+    .code-copy { background: transparent; border: 1px solid var(--border-card); color: var(--text-secondary); padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; cursor: pointer; font-family: var(--font-arabic); transition: all var(--transition-fast); }
+    .code-copy:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+    .code-copy.ok { color: #8fb940; border-color: rgba(92,126,16,0.5); }
+    .code-body { background: var(--bg-deep); padding: var(--space-lg); font-family: var(--font-mono); font-size: 0.82rem; color: #c9d1d9; line-height: 1.7; overflow-x: auto; white-space: pre; }
+    .code-body .c  { color: #6a9955; } /* comment */
+    .code-body .k  { color: #c586c0; } /* keyword */
+    .code-body .v  { color: #ce9178; } /* value/string */
+    .code-body .s  { color: #9cdcfe; } /* variable */
+
+    /* Step list */
+    .steps-ol { list-style: none; counter-reset: steps; display: flex; flex-direction: column; gap: var(--space-lg); }
+    .steps-ol li { display: flex; gap: var(--space-md); }
+    .steps-ol li::before { counter-increment: steps; content: counter(steps); width: 30px; height: 30px; border-radius: 50%; background: rgba(102,192,244,0.12); color: var(--accent-blue); font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+    .step-body h4 { color: var(--text-white); margin-bottom: 4px; }
+    .step-body p  { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.65; margin: 0; }
+
+    .ic { background: rgba(0,0,0,0.4); border: 1px solid var(--border-card); border-radius: 4px; padding: 2px 6px; font-family: var(--font-mono); font-size: 0.82em; color: var(--accent-blue); }
+
+    /* Requirements box */
+    .req-box { background: rgba(0,0,0,0.2); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: var(--space-md) var(--space-lg); margin-bottom: var(--space-xl); }
+    .req-box-title { font-weight: 700; color: var(--text-white); margin-bottom: var(--space-sm); }
+    .req-list { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
+  </style>
+</head>
+<body>
+<nav class="nav" id="nav-host"></nav>
+
+<main class="guide-main">
+  <div style="margin-bottom:var(--space-xl)">
+    <h1 style="font-size:clamp(1.8rem,4vw,2.5rem)">🚀 دليل النشر</h1>
+    <p style="color:var(--text-secondary);margin-top:var(--space-sm)">اختر طريقة النشر المناسبة لبيئتك: Docker (موصى به)، Systemd، أو cron مباشر.</p>
+  </div>
+
+  <!-- Requirements -->
+  <div class="req-box">
+    <div class="req-box-title">📋 المتطلبات الأساسية</div>
+    <div class="req-list">
+      <span class="badge badge-blue">Python 3.10+</span>
+      <span class="badge badge-blue">Playwright + Chromium</span>
+      <span class="badge badge-gray">STEAM_WEB_API_KEY</span>
+      <span class="badge badge-gray">OPENCLAW_TELEGRAM_BOT_TOKEN</span>
+      <span class="badge badge-gray">2GB RAM min (Chromium)</span>
+      <span class="badge badge-gray">Ubuntu 22+ / Debian 11+</span>
+    </div>
+  </div>
+
+  <!-- Method tabs -->
+  <div class="method-tabs">
+    <div class="method-tab active" data-method="docker">
+      <div class="method-tab-icon">🐳</div>
+      <div class="method-tab-name">Docker</div>
+      <div class="method-tab-sub">موصى به — الأسهل</div>
+    </div>
+    <div class="method-tab" data-method="systemd">
+      <div class="method-tab-icon">⚙️</div>
+      <div class="method-tab-name">Systemd</div>
+      <div class="method-tab-sub">Linux server</div>
+    </div>
+    <div class="method-tab" data-method="cron">
+      <div class="method-tab-icon">🐍</div>
+      <div class="method-tab-name">Python + cron</div>
+      <div class="method-tab-sub">بسيط ومرن</div>
+    </div>
+  </div>
+
+  <!-- Docker -->
+  <div class="method-content active" id="method-docker">
+    <div class="card mb-lg">
+      <h3 class="text-white mb-md">🐳 نشر بـ Docker Compose</h3>
+      <ol class="steps-ol">
+        <li>
+          <div class="step-body">
+            <h4>ولّد الملفات من Builder</h4>
+            <p>اضغط <b>Docker Compose</b> في صفحة Builder لتنزيل <span class="ic">docker-compose.yml</span>.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-body">
+            <h4>أنشئ ملف <span class="ic">.env</span></h4>
+            <div class="code-wrap">
+              <div class="code-head"><span class="code-lang">.env</span><button class="code-copy">نسخ</button></div>
+              <div class="code-body">STEAM_WEB_API_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+OPENCLAW_TELEGRAM_BOT_TOKEN=1234567890:ABCDEFGxxxxxxxxxxxxxxxxxx
+# ITAD_API_KEY=your_key  # optional, for Task 7</div>
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="step-body">
+            <h4>ضع الملفات في مجلد وشغّل</h4>
+            <div class="code-wrap">
+              <div class="code-head"><span class="code-lang">bash</span><button class="code-copy">نسخ</button></div>
+              <div class="code-body">mkdir openclaw-steam && cd openclaw-steam
+# ضع cron_tasks.yaml و docker-compose.yml هنا
+mkdir state
+docker compose up -d
+
+# تابع السجلات
+docker compose logs -f</div>
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="step-body">
+            <h4>تحقق أن الحاوية تعمل</h4>
+            <div class="code-wrap">
+              <div class="code-head"><span class="code-lang">bash</span><button class="code-copy">نسخ</button></div>
+              <div class="code-body">docker compose ps
+docker compose exec openclaw-steam openclaw status</div>
+            </div>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <div class="alert alert-success">
+      <span class="alert-icon">✅</span>
+      <div class="alert-content"><b>مميزات Docker:</b> Chromium مدمج، إعادة تشغيل تلقائية، عزل كامل، سهولة التحديث.</div>
+    </div>
+  </div>
+
+  <!-- Systemd -->
+  <div class="method-content" id="method-systemd">
+    <div class="card mb-lg">
+      <h3 class="text-white mb-md">⚙️ نشر بـ Systemd</h3>
+      <ol class="steps-ol">
+        <li>
+          <div class="step-body">
+            <h4>ولّد ملفات Systemd من Builder</h4>
+            <p>اضغط <b>Systemd Service</b> — ستحصل على 3 ملفات: service، timer، وinstall.sh.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-body">
+            <h4>ارفع الملفات للسيرفر</h4>
+            <div class="code-wrap">
+              <div class="code-head"><span class="code-lang">bash</span><button class="code-copy">نسخ</button></div>
+              <div class="code-body">scp cron_tasks.yaml openclaw-steam.service openclaw-steam.timer install.sh user@server:~/</div>
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="step-body">
+            <h4>شغّل سكريبت التثبيت</h4>
+            <div class="code-wrap">
+              <div class="code-head"><span class="code-lang">bash</span><button class="code-copy">نسخ</button></div>
+              <div class="code-body">chmod +x install.sh
+sudo ./install.sh
+
+# حرّر ملف .env بعدها
+sudo nano /opt/openclaw/.env</div>
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="step-body">
+            <h4>تحقق من الحالة</h4>
+            <div class="code-wrap">
+              <div class="code-head"><span class="code-lang">bash</span><button class="code-copy">نسخ</button></div>
+              <div class="code-body">systemctl status openclaw-steam
+journalctl -u openclaw-steam -f --output=cat</div>
+            </div>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <div class="alert alert-info">
+      <span class="alert-icon">ℹ️</span>
+      <div class="alert-content">Systemd يديرها كـ daemon — يبدأ تلقائياً عند restart السيرفر ويعيد المحاولة عند الأخطاء.</div>
+    </div>
+  </div>
+
+  <!-- Cron -->
+  <div class="method-content" id="method-cron">
+    <div class="card mb-lg">
+      <h3 class="text-white mb-md">🐍 Python + crontab</h3>
+      <ol class="steps-ol">
+        <li>
+          <div class="step-body">
+            <h4>ثبّت openclaw والمتطلبات</h4>
+            <div class="code-wrap">
+              <div class="code-head"><span class="code-lang">bash</span><button class="code-copy">نسخ</button></div>
+              <div class="code-body">python3 -m venv ~/openclaw-env
+source ~/openclaw-env/bin/activate
+pip install openclaw playwright
+playwright install chromium</div>
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="step-body">
+            <h4>ضع متغيرات البيئة</h4>
+            <div class="code-wrap">
+              <div class="code-head"><span class="code-lang">bash</span><button class="code-copy">نسخ</button></div>
+              <div class="code-body">cat >> ~/.bashrc << 'EOF'
+export STEAM_WEB_API_KEY="your_key"
+export OPENCLAW_TELEGRAM_BOT_TOKEN="your_token"
+EOF
+source ~/.bashrc</div>
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="step-body">
+            <h4>شغّل openclaw بـ crontab</h4>
+            <div class="code-wrap">
+              <div class="code-head"><span class="code-lang">bash</span><button class="code-copy">نسخ</button></div>
+              <div class="code-body">crontab -e
+
+# أضف هذا السطر (openclaw يقرأ الجدول من الـ YAML):
+@reboot /bin/bash -c 'source ~/.bashrc && ~/openclaw-env/bin/openclaw run ~/cron_tasks.yaml' &</div>
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="step-body">
+            <h4>شغّل يدوياً للاختبار</h4>
+            <div class="code-wrap">
+              <div class="code-head"><span class="code-lang">bash</span><button class="code-copy">نسخ</button></div>
+              <div class="code-body">source ~/openclaw-env/bin/activate
+openclaw run cron_tasks.yaml --task steam_free_deals_daily --now</div>
+            </div>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Troubleshooting -->
+  <div style="margin-top:var(--space-2xl)">
+    <h2 class="mb-lg">🔧 حل المشاكل الشائعة</h2>
+    <div style="display:flex;flex-direction:column;gap:var(--space-md)">
+
+      <div class="card">
+        <h4 class="text-gold">Chromium / Playwright لا يعمل</h4>
+        <p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:var(--space-sm)">مشكلة شائعة في السيرفرات بدون GUI.</p>
+        <div class="code-wrap">
+          <div class="code-head"><span class="code-lang">bash</span><button class="code-copy">نسخ</button></div>
+          <div class="code-body"># تثبيت dependencies للـ headless Chromium
+sudo apt-get install -y libnss3 libatk-bridge2.0-0 libdrm2 libxcomposite1 \
+  libxdamage1 libxfixes3 libxrandr2 libgbm1 libpango-1.0-0 libcairo2
+
+# أو عبر Playwright مباشرةً
+playwright install-deps chromium</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h4 class="text-gold">Telegram: "Bad Request: can't parse entities"</h4>
+        <p style="font-size:0.875rem;color:var(--text-secondary)">هذا خطأ الـ parse_mode. الـ YAML المولَّد يتضمن <span class="ic">parse_mode: HTML</span> في كل مهمة — تأكد أنك تستخدم YAML المولَّد من Builder v3.0.</p>
+      </div>
+
+      <div class="card">
+        <h4 class="text-gold">Steam API: 401 / 403</h4>
+        <p style="font-size:0.875rem;color:var(--text-secondary)">تأكد أن <span class="ic">STEAM_WEB_API_KEY</span> صحيح وأن حسابك غير مقيّد. أعد توليد المفتاح إذا لزم من <a href="https://steamcommunity.com/dev/apikey" target="_blank" rel="noopener" style="color:var(--accent-blue)">steamcommunity.com/dev/apikey</a></p>
+      </div>
+
+      <div class="card">
+        <h4 class="text-gold">المهمة 3 أو 8 لا تُرسل صورة</h4>
+        <p style="font-size:0.875rem;color:var(--text-secondary)">تحقق من <span class="ic">./state/render_errors.log</span> — المهمة تفشل إلى إرسال نص في حال فشل Playwright.</p>
+        <div class="code-wrap">
+          <div class="code-head"><span class="code-lang">bash</span><button class="code-copy">نسخ</button></div>
+          <div class="code-body">cat ./state/render_errors.log</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="card card-gold text-center" style="margin-top:var(--space-xl);padding:var(--space-xl)">
+    <p style="color:var(--accent-gold);font-weight:700;font-size:1rem;margin-bottom:var(--space-md)">🎯 جاهز للبناء؟</p>
+    <div style="display:flex;gap:var(--space-md);justify-content:center;flex-wrap:wrap">
+      <a href="builder.html" class="btn btn-gold">⚡ ابدأ البناء</a>
+      <a href="guide-api-keys.html" class="btn btn-ghost">🔑 دليل المفاتيح</a>
+    </div>
+  </div>
+</main>
+
+<footer class="footer" id="footer-host"></footer>
+
+<script type="module">
+import { initPage } from '../js/app.js';
+initPage('guide-deploy');
+
+// Method tabs
+document.querySelectorAll('.method-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.method-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.method-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('method-' + tab.dataset.method)?.classList.add('active');
+  });
+});
+
+// Copy buttons
+document.querySelectorAll('.code-copy').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const code = btn.closest('.code-wrap').querySelector('.code-body').textContent;
+    try {
+      await navigator.clipboard.writeText(code.trim());
+      btn.textContent = '✓';
+      btn.classList.add('ok');
+      setTimeout(() => { btn.textContent = 'نسخ'; btn.classList.remove('ok'); }, 2000);
+    } catch {}
+  });
+});
+</script>
+</body>
+</html>
