@@ -15,6 +15,42 @@
     .builder-grid { display: grid; grid-template-columns: 1fr 370px; gap: var(--space-xl); max-width: 1300px; margin: 0 auto; align-items: start; }
     @media(max-width:1100px){ .builder-grid{ grid-template-columns:1fr; } }
 
+    /* ── Mobile ≤640px ─────────────────────────────────────── */
+    @media(max-width:640px){
+      .builder-main { padding: calc(var(--nav-height) + var(--space-md)) var(--space-md) var(--space-xl); }
+      .step-section-body { padding: var(--space-md); }
+      .step-section-header { padding: var(--space-sm) var(--space-md); }
+      /* Region/currency/timezone row → single column */
+      .builder-main .grid-3 { grid-template-columns: 1fr !important; gap: var(--space-sm) !important; }
+      /* Config rows → stack label above value */
+      .cfg-row { flex-direction: column; align-items: flex-start; gap: var(--space-xs); }
+      .cfg-label { min-width: unset; width: 100%; }
+      .cfg-val { width: 100%; }
+      /* Export buttons → full-width column */
+      .export-btns { flex-direction: column; gap: var(--space-sm); }
+      .export-btns .btn { width: 100%; justify-content: center; }
+      /* YAML preview */
+      .yaml-content { font-size: 0.68rem; padding: var(--space-sm); }
+      /* Preview panel drops sticky on mobile */
+      .preview-sticky { position: static; }
+      .preview-box .preview-body { max-height: 300px; }
+      /* Task card head tighter */
+      .b-task-head { padding: var(--space-sm) var(--space-md); gap: var(--space-sm); }
+      .b-task-meta { font-size: 0.7rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 55vw; }
+      .b-task-body { padding: var(--space-md); }
+      /* Cron NL */
+      .cron-nl-row { flex-direction: column; }
+      .cron-nl-row .btn { width: 100%; }
+      /* Steam verify */
+      .steam-verify-row { flex-wrap: wrap; gap: var(--space-sm); }
+      .steam-verify-row .form-input { flex: 1 1 160px; }
+      /* Schedule */
+      .sched-custom-row { flex-direction: column; align-items: flex-start; gap: var(--space-xs); }
+      .cron-result { font-size: 0.78rem; width: 100%; }
+      /* Step-num smaller on tiny screens */
+      .step-num-big { width: 32px; height: 32px; font-size: 0.95rem; }
+    }
+
     .step-section { margin-bottom: var(--space-xl); }
     .step-section-header {
       display: flex; align-items: center; gap: var(--space-md);
