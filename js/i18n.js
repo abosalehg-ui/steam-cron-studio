@@ -14,8 +14,8 @@ export const translations = {
     lang_toggle:       'EN',
 
     // Hero
-    hero_title:        'بنّاء مهام Steam البصري',
-    hero_highlight:    'Steam',
+    hero_title_pre:    'بنّاء مهام ',
+    hero_title_post:   ' البصري',
     hero_subtitle:     'أنتج ملف cron_tasks.yaml احترافي لوكلاء الذكاء الاصطناعي في دقائق — تصميم بصري، دعم عربي كامل، تصدير متعدد الصيغ.',
     cta_start:         'ابدأ البناء',
     cta_guide:         'الدليل',
@@ -147,8 +147,8 @@ export const translations = {
     lang_toggle:       'عربي',
 
     // Hero
-    hero_title:        'Visual Steam Task Builder',
-    hero_highlight:    'Steam',
+    hero_title_pre:    'Visual ',
+    hero_title_post:   ' Task Builder',
     hero_subtitle:     'Generate production-ready cron_tasks.yaml for AI agents in minutes — visual builder, Arabic RTL support, multiple export formats.',
     cta_start:         'Start Building',
     cta_guide:         'Guide',
