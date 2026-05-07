@@ -34,6 +34,8 @@
       /* Preview panel drops sticky on mobile */
       .preview-sticky { position: static; }
       .preview-box .preview-body { max-height: 300px; }
+      /* tg-preview full width */
+      .tg-preview { max-width: 100%; font-size: 0.82rem; }
       /* Task card head tighter */
       .b-task-head { padding: var(--space-sm) var(--space-md); gap: var(--space-sm); }
       .b-task-meta { font-size: 0.7rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 55vw; }
@@ -49,6 +51,17 @@
       .cron-result { font-size: 0.78rem; width: 100%; }
       /* Step-num smaller on tiny screens */
       .step-num-big { width: 32px; height: 32px; font-size: 0.95rem; }
+      /* num-input full row */
+      .num-input-wrap { gap: var(--space-sm); }
+      .num-field { width: 56px; }
+      /* tag input */
+      .tag-wrap { min-height: 38px; }
+      /* yaml-mini-preview in right panel */
+      #yaml-mini-preview { max-height: 240px; }
+      /* Section header title size */
+      .step-section-header [style*="font-size:1.1rem"] { font-size: 1rem !important; }
+      /* Builder grid separation */
+      .builder-grid > div + div { margin-top: 0; }
     }
 
     .step-section { margin-bottom: var(--space-xl); }
@@ -182,9 +195,9 @@
     .export-btns { display: flex; flex-wrap: wrap; gap: var(--space-md); margin-top: var(--space-lg); }
 
     /* YAML preview */
+    .yaml-content { padding: var(--space-md); font-family: var(--font-mono); font-size: 0.78rem; color: var(--accent-blue); line-height: 1.7; max-height: 300px; overflow-y: auto; overflow-x: auto; white-space: pre; }
     .yaml-box { background: var(--bg-deep); border: 1px solid var(--border-card); border-radius: var(--radius-md); overflow: hidden; }
     .yaml-box-head { padding: var(--space-sm) var(--space-md); border-bottom: 1px solid var(--border-card); display: flex; justify-content: space-between; align-items: center; }
-    .yaml-content { padding: var(--space-md); font-family: var(--font-mono); font-size: 0.78rem; color: var(--accent-blue); line-height: 1.7; max-height: 300px; overflow-y: auto; white-space: pre; }
 
     /* Cron NL section */
     .cron-nl-box { background: rgba(0,0,0,0.2); border: 1px solid var(--border-card); border-radius: var(--radius-md); padding: var(--space-md); margin-top: var(--space-md); }
