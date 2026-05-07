@@ -91,6 +91,8 @@ function buildNav(activePage, isRoot = false) {
   const items = isRoot ? NAV_ITEMS_ROOT : NAV_ITEMS;
   const lang  = getLang();
 
+  const builderHref = isRoot ? 'pages/builder.html' : '../pages/builder.html';
+
   host.innerHTML = `
     <a class="nav-brand" href="${isRoot ? 'index.html' : '../index.html'}">
       <img src="${isRoot ? 'assets/icons/logo.svg' : '../assets/icons/logo.svg'}" alt="Logo">
@@ -110,12 +112,60 @@ function buildNav(activePage, isRoot = false) {
         <span>🌐</span>
         <span class="lang-toggle-text">${t('lang_toggle', lang)}</span>
       </button>
-      <a href="${isRoot ? 'pages/builder.html' : '../pages/builder.html'}"
-         class="btn btn-primary btn-sm" data-i18n="cta_start">
+      <a href="${builderHref}" class="btn btn-primary btn-sm" data-i18n="cta_start">
         ${t('cta_start', lang)}
       </a>
     </div>
+    <button class="nav-hamburger" id="nav-hamburger-btn" aria-label="القائمة" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
   `;
+
+  // Inject mobile drawer right after nav (only once)
+  if (!document.getElementById('nav-mobile-drawer')) {
+    const drawer = document.createElement('div');
+    drawer.className = 'nav-mobile-drawer';
+    drawer.id = 'nav-mobile-drawer';
+    drawer.innerHTML = `
+      ${items.map(item => `
+        <a href="${item.href}" class="${item.page === activePage ? 'active' : ''}" data-i18n="${item.key}">
+          ${t(item.key, lang)}
+        </a>
+      `).join('')}
+      <div class="drawer-cta">
+        <button class="btn btn-ghost btn-sm" id="drawer-lang-btn">
+          🌐 ${t('lang_toggle', lang)}
+        </button>
+        <a href="${builderHref}" class="btn btn-primary btn-sm">${t('cta_start', lang)}</a>
+      </div>
+    `;
+    document.body.insertBefore(drawer, document.body.firstChild);
+
+    document.getElementById('drawer-lang-btn')?.addEventListener('click', () => {
+      const newLang = getLang() === 'ar' ? 'en' : 'ar';
+      setLang(newLang);
+    });
+  }
+
+  // Hamburger toggle
+  const hamburger = document.getElementById('nav-hamburger-btn');
+  const drawer2   = document.getElementById('nav-mobile-drawer');
+  hamburger?.addEventListener('click', () => {
+    const isOpen = drawer2.classList.toggle('open');
+    hamburger.classList.toggle('open', isOpen);
+    hamburger.setAttribute('aria-expanded', isOpen);
+  });
+
+  // Close drawer on outside click
+  document.addEventListener('click', (e) => {
+    const d = document.getElementById('nav-mobile-drawer');
+    const h = document.getElementById('nav-hamburger-btn');
+    if (d?.classList.contains('open') && !d.contains(e.target) && !h?.contains(e.target)) {
+      d.classList.remove('open');
+      h?.classList.remove('open');
+      h?.setAttribute('aria-expanded', 'false');
+    }
+  }, { passive: true });
 
   document.getElementById('lang-toggle-btn')?.addEventListener('click', () => {
     const newLang = getLang() === 'ar' ? 'en' : 'ar';
