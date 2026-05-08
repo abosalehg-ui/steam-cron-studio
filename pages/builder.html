@@ -8,18 +8,25 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Amiri:wght@400;700&family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/steam-theme.css?v=20260508">
+  <link rel="stylesheet" href="../css/steam-theme.css?v=20260508b">
   <link rel="stylesheet" href="../css/components.css">
   <style>
-    .builder-main { padding: calc(var(--nav-height) + var(--space-lg)) var(--space-xl) var(--space-2xl); }
-    .builder-grid { display: grid; grid-template-columns: 1fr 370px; gap: var(--space-xl); max-width: 1300px; margin: 0 auto; align-items: start; }
-    @media(max-width:1100px){ .builder-grid{ grid-template-columns:1fr; } }
+    /* ── Global overflow guard ──────────────────────────────── */
+    html, body { overflow-x: hidden; max-width: 100vw; }
+    .builder-main { padding: calc(var(--nav-height) + var(--space-lg)) var(--space-xl) var(--space-2xl); max-width: 100%; box-sizing: border-box; }
+    .builder-grid { display: grid; grid-template-columns: minmax(0, 1fr) 370px; gap: var(--space-xl); max-width: 1300px; margin: 0 auto; align-items: start; }
+    .builder-grid > * { min-width: 0; }
+    @media(max-width:1100px){ .builder-grid{ grid-template-columns: minmax(0, 1fr); } }
 
     /* ── Mobile ≤640px ─────────────────────────────────────── */
     @media(max-width:640px){
       .builder-main { padding: calc(var(--nav-height) + var(--space-md)) var(--space-md) var(--space-xl); }
+      .builder-grid, .builder-left, .builder-right { width: 100%; max-width: 100%; min-width: 0; }
+      .step-section, .step-section-header, .step-section-body { max-width: 100%; box-sizing: border-box; }
       .step-section-body { padding: var(--space-md); }
       .step-section-header { padding: var(--space-sm) var(--space-md); }
+      /* Force ALL inputs/selects to respect parent width */
+      .form-input, .form-select, input, select, textarea { max-width: 100%; box-sizing: border-box; }
       /* Region/currency/timezone row → single column */
       .builder-main .grid-3 { grid-template-columns: 1fr !important; gap: var(--space-sm) !important; }
       /* Config rows → stack label above value */
@@ -33,35 +40,38 @@
       .yaml-content { font-size: 0.68rem; padding: var(--space-sm); }
       /* Preview panel drops sticky on mobile */
       .preview-sticky { position: static; }
+      .preview-box { max-width: 100%; }
       .preview-box .preview-body { max-height: 300px; }
-      /* tg-preview full width */
-      .tg-preview { max-width: 100%; font-size: 0.82rem; }
+      /* tg-preview full width — override desktop max-width:340px */
+      .tg-preview { max-width: 100% !important; min-width: 0; font-size: 0.82rem; box-sizing: border-box; }
       /* Task card head tighter */
       .b-task-head { padding: var(--space-sm) var(--space-md); gap: var(--space-sm); }
-      .b-task-meta { font-size: 0.7rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 55vw; }
+      .b-task-meta { font-size: 0.7rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 50vw; min-width: 0; }
       .b-task-body { padding: var(--space-md); }
       /* Cron NL */
       .cron-nl-row { flex-direction: column; }
       .cron-nl-row .btn { width: 100%; }
       /* Steam verify */
       .steam-verify-row { flex-wrap: wrap; gap: var(--space-sm); }
-      .steam-verify-row .form-input { flex: 1 1 160px; }
+      .steam-verify-row .form-input { flex: 1 1 160px; min-width: 0; }
       /* Schedule */
       .sched-custom-row { flex-direction: column; align-items: flex-start; gap: var(--space-xs); }
-      .cron-result { font-size: 0.78rem; width: 100%; }
+      .cron-result { font-size: 0.78rem; width: 100%; word-break: break-all; }
       /* Step-num smaller on tiny screens */
       .step-num-big { width: 32px; height: 32px; font-size: 0.95rem; }
       /* num-input full row */
-      .num-input-wrap { gap: var(--space-sm); }
+      .num-input-wrap { gap: var(--space-sm); flex-wrap: wrap; }
       .num-field { width: 56px; }
       /* tag input */
-      .tag-wrap { min-height: 38px; }
+      .tag-wrap { min-height: 38px; max-width: 100%; flex-wrap: wrap; }
       /* yaml-mini-preview in right panel */
-      #yaml-mini-preview { max-height: 240px; }
+      #yaml-mini-preview { max-height: 240px; max-width: 100%; }
       /* Section header title size */
       .step-section-header [style*="font-size:1.1rem"] { font-size: 1rem !important; }
       /* Builder grid separation */
       .builder-grid > div + div { margin-top: 0; }
+      /* Force ALL pre/code blocks to respect viewport */
+      pre, code { max-width: 100%; box-sizing: border-box; word-wrap: break-word; }
     }
 
     .step-section { margin-bottom: var(--space-xl); }
@@ -403,14 +413,14 @@
 <footer class="footer" id="footer-host"></footer>
 
 <script type="module">
-import { initPage, showToast, downloadFile, copyToClipboard, fetchSteamProfile, isValidSteamId, getLang, setState, getState } from '../js/app.js?v=20260508';
+import { initPage, showToast, downloadFile, copyToClipboard, fetchSteamProfile, isValidSteamId, getLang, setState, getState } from '../js/app.js?v=20260508b';
 import { TASKS_REGISTRY, buildDefaultConfigs } from '../js/tasks-registry.js';
 import { generateYaml }         from '../js/generators/yaml.js';
 import { generateDockerCompose } from '../js/generators/docker.js';
 import { generateSystemd }       from '../js/generators/systemd.js';
 import { nlToCron, cronToHuman } from '../js/utils/cron-nl.js';
 import { buildShareUrl, readConfigFromUrl } from '../js/utils/url-state.js';
-import { t } from '../js/i18n.js?v=20260508';
+import { t } from '../js/i18n.js?v=20260508b';
 
 // ── App State ──────────────────────────────────────────────────
 let tasksCfg = buildDefaultConfigs();
